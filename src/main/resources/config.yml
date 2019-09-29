@@ -1,0 +1,31 @@
+# DiscordBotに関する設定
+Token: [BOTのトークン]
+ChannelId: [チェンネルID]
+PlayGame: [BOTがプレイ中のゲーム]
+
+# 管理コマンドを実行できるユーザー(ID)
+Admin:
+- [ユーザーID]
+
+# Minecraftサーバーに関する設定
+ServerName: [サーバーの名前]
+
+# Discord コマンドに関する設定
+FirstChar: [BOTコマンドの最初の文字]
+
+# 省電力自動クローズ機能
+time: [全プレイヤー退出の何分後に閉じるか]
+
+# 各サーバーの設定
+Server_List:
+- Server1
+Server_Info:
+  Server1:
+    Dir: [サーバー1のディレクトリ]
+    File: [サーバー1の実行]
+    Args: [引数 (-jarは不要)]
+    Rcon: [サーバーのrconのポート]
+    Rcon_passwd: [rconのパスワード]
+
+# デバッグ情報の出力(falseをお勧めします)
+debug: false
