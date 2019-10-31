@@ -111,11 +111,6 @@ public class ServerManager extends Plugin {
 			//処理終了まで待機
 			for(int i = 0; i < ConfigData.s_info.length; i++) {
 	    		while(ConfigData.s_info[i].enabled || ConfigData.s_info[i].switching) {
-	    			try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
 	    		}
 	    	}
     	}
