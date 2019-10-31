@@ -1,6 +1,12 @@
 D:\yutod\Documents\フォルダ\BukkitPL\ServerManager\src\main\java\com\github\nova27\servermanager\listener\BungeeListener.java
 D:\yutod\Documents\フォルダ\BukkitPL\ServerManager\src\main\java\com\github\nova27\servermanager\listener\DiscordListener.java
+D:\yutod\Documents\フォルダ\BukkitPL\ServerManager\src\main\java\com\github\nova27\servermanager\Util\Bridge.java
+D:\yutod\Documents\フォルダ\BukkitPL\ServerManager\src\main\java\com\github\nova27\servermanager\Util\Log_getter_thread.java
+D:\yutod\Documents\フォルダ\BukkitPL\ServerManager\src\main\java\com\github\nova27\servermanager\Util\Log_getter_event.java
 D:\yutod\Documents\フォルダ\BukkitPL\ServerManager\src\main\java\com\github\nova27\servermanager\ServerManager.java
+D:\yutod\Documents\フォルダ\BukkitPL\ServerManager\src\main\java\com\github\nova27\servermanager\Util\Com_result_event.java
 D:\yutod\Documents\フォルダ\BukkitPL\ServerManager\src\main\java\com\github\nova27\servermanager\config\ConfigData.java
 D:\yutod\Documents\フォルダ\BukkitPL\ServerManager\src\main\java\com\github\nova27\servermanager\config\Config_get.java
-D:\yutod\Documents\フォルダ\BukkitPL\ServerManager\src\main\java\com\github\nova27\servermanager\config\IP_get.java
+D:\yutod\Documents\フォルダ\BukkitPL\ServerManager\src\main\java\com\github\nova27\servermanager\config\IP_port_get.java
+D:\yutod\Documents\フォルダ\BukkitPL\ServerManager\src\main\java\com\github\nova27\servermanager\config\Server_info.java
+D:\yutod\Documents\フォルダ\BukkitPL\ServerManager\src\main\java\com\github\nova27\servermanager\Util\Com_result_thread.java

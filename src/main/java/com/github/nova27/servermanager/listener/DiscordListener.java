@@ -1,40 +1,51 @@
 package com.github.nova27.servermanager.listener;
 
-import java.util.Arrays;
-
 import com.github.nova27.servermanager.ServerManager;
+import com.github.nova27.servermanager.Util.Com_result_event;
 import com.github.nova27.servermanager.config.ConfigData;
 
+import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
-
 public class DiscordListener extends ListenerAdapter {
-	private final ServerManager main;
+	private ServerManager main;
 
+	/**
+	 * コンストラクタ
+	 * @param main
+	 */
 	public DiscordListener(ServerManager main) {
 		this.main = main;
 	}
 
+	/**
+	 * Botが起動完了したら
+	 */
 	@Override
 	public void onReady(ReadyEvent event) {
-		main.setGame();
-		String sendText = "";
+		main.jda().getPresence().setGame(Game.playing(ConfigData.PlayGame));
 
 		main.log("discordに接続しました！");
-		sendText += ":white_check_mark: " + ConfigData.ServerName + "サーバーのプロキシが起動しました\n";
+		main.bridge.sendToDiscord(":white_check_mark: " + ConfigData.ServerName + "サーバーのプロキシが起動しました\n");
 
-
-		main.ServerSwitch();
+		for(int i = 0; i < ConfigData.s_info.length;i++) {
+			ConfigData.s_info[i].Server_On();
+		}
+		main.s_started = true;
 		main.closetimer();
 		main.log("サーバー停止アラーム作動");
-		sendText += ":alarm_clock: " + ConfigData.close_time + "分後に各サーバーが停止します";
-		main.sendToDiscord(sendText);
+		main.bridge.sendToDiscord(":alarm_clock: " + ConfigData.close_time + "分後に各サーバーが停止します");
 
 		super.onReady(event);
 	}
 
+	/**
+	 * メッセージが送信されたら
+	 */
+	private int result_get_count;
+	private String[] results;
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
 		if(event.getAuthor().isBot()) return;
@@ -43,15 +54,13 @@ public class DiscordListener extends ListenerAdapter {
 
 		// コマンドかどうか
 		String FirstChar = ConfigData.FirstChar;
-
 		if (event.getMessage().getContentRaw().startsWith(FirstChar)) {
 			String command = event.getMessage().getContentRaw().replace(FirstChar, "").split(" ")[0];
-			String[] args = event.getMessage().getContentRaw().replace(FirstChar + command + " ", "").split(" +");
-			main.log(Arrays.deepToString(args));
+			String[] args = event.getMessage().getContentRaw().replace(FirstChar + command + "\\s+", "").split("\\s+");
 
 			if (command.equalsIgnoreCase("help")) {
 				//helpコマンド
-				main.embed(event.getAuthor().getName(), "コマンド一覧", new String[][] {
+				main.bridge.embed(event.getAuthor().getName(), "コマンド一覧", new String[][] {
 					{
 						FirstChar + "help",
 						"(botの)コマンド一覧を出力します"
@@ -71,7 +80,7 @@ public class DiscordListener extends ListenerAdapter {
 				});
 			}else if (command.equalsIgnoreCase("info")) {
 				//infoコマンド
-				main.embed(event.getAuthor().getName(), "サーバー情報", new String[][] {
+				main.bridge.embed(event.getAuthor().getName(), "サーバー情報", new String[][] {
 					{
 						"IPアドレス",
 						ConfigData.IP
@@ -83,77 +92,125 @@ public class DiscordListener extends ListenerAdapter {
 				});
 			}else if (command.equalsIgnoreCase("status")) {
 				//statusコマンド
-				String [][] Server_info = new String[ConfigData.Server_info.length][2];
-				for(int i = 0; i <= ConfigData.Server_info.length - 1; i++) {
-					Server_info[i][0] = ConfigData.Server_info[i][0];
-					String[] server = ConfigData.Server_info[i];
-					String Text = "有効であるか : " + ConfigData.enabled[i] + "\n";
-					if(ConfigData.enabled[i] && main.s_started) {
-						Text += "プレイヤー : " + main.rcon_send(server, "list") + "\n";
-					}
-					Server_info [i][1] = Text;
-				}
-				String [][] Bungee_info = {
-						{
-							"BungeeCord統計情報",
-							"プレイヤー数 : " + main.PlayerCount(0) + "人"
-						}
-				};
-				String[][] embed_Text = new String[Server_info.length + Bungee_info.length][2];
+				String[][] Embed_text = new String[ConfigData.s_info.length + 1][2];
 
-				System.arraycopy(Bungee_info, 0, embed_Text, 0, Bungee_info.length);
-				System.arraycopy(Server_info, 0, embed_Text, Bungee_info.length, Server_info.length);
-				main.embed(event.getAuthor().getName(), "サーバーステータス", embed_Text);
+				//初期化
+				result_get_count = 0;
+				int enabled_server = 0;
+				for(int i = 0; i < ConfigData.s_info.length; i++) {
+					if(ConfigData.s_info[i].enabled) {
+						enabled_server++;
+					}
+				}
+				results = new String[enabled_server];
+
+				if(!main.s_started || enabled_server == 0) {
+					//サーバーが停止中だったら
+					Embed_text[0][0] = "BungeeCord統計情報";
+					Embed_text[0][1] = "プレイヤー数 : 0人";
+					for(int i = 0; i < ConfigData.s_info.length; i++) {
+						Embed_text[i+1][0] = ConfigData.s_info[i].Name;
+						Embed_text[i+1][1] = "有効であるか : " + ConfigData.s_info[i].enabled;
+					}
+
+					main.bridge.embed(event.getAuthor().getName(), "サーバーステータス", Embed_text);
+				}else {
+					//コマンドの実行
+					for(int i = 0; i < ConfigData.s_info.length; i++) {
+						if(ConfigData.s_info[i].enabled) {
+							boolean result = ConfigData.s_info[i].Exec_command("list", "There are.+of a max.+players online:.+", new Com_result_event() {
+								@Override
+								public void got_result(String result) {
+									results[result_get_count] = result;
+
+									result_get_count++;
+									String[][] Embed_text;
+									if(result_get_count == results.length) {
+										Embed_text = new String[ConfigData.s_info.length + 1][2];
+										Embed_text[0][0] = "BungeeCord統計情報";
+										Embed_text[0][1] = "プレイヤー数 : 0人";
+
+										int j = 0;
+										for(int i = 0; i < ConfigData.s_info.length; i++) {
+											Embed_text[i+1][0] = ConfigData.s_info[i].Name;
+											Embed_text[i+1][1] = "有効であるか : " + ConfigData.s_info[i].enabled;
+
+											if(ConfigData.s_info[i].enabled) {
+												Embed_text[i+1][1] += "\nプレイヤー数 : " + results[j];
+												j++;
+											}
+										}
+
+										main.bridge.embed(event.getAuthor().getName(), "サーバーステータス", Embed_text);
+									}
+								}
+							});
+
+							if(!result) {
+								main.bridge.sendToDiscord(":exclamation: サーバーは現在処理中です！");
+								return;
+							}
+						}
+					}
+				}
 			}else if(command.equalsIgnoreCase("enable")){
 				//Adminかどうか
 				if (!isAdmin(event.getGuild().getId())) {
-					main.sendToDiscord(":exclamation: このコマンドは管理者専用です！");
-					main.log("管理コマンドを実行したユーザーのID : " + event.getGuild().getId());
-					main.log("config : " + ConfigData.Admin_UserID[0]);
+					main.bridge.sendToDiscord(":exclamation: このコマンドは管理者専用です！");
 					return;
 				}
 
 				if(args.length < 2) {
-					main.sendToDiscord("コマンドの構文が間違っています！");
+					main.bridge.sendToDiscord("コマンドの構文が間違っています！");
 					return;
 				}
 
 				boolean flag = Boolean.valueOf(args[1]);
 
-				for(int i = 0; i <= ConfigData.Server_info.length - 1; i++) {
-					if(args[0].equals(ConfigData.Server_info[i][0])) {
-						if(ConfigData.enabled[i]== flag) {
+				for(int i = 0; i <= ConfigData.s_info.length - 1; i++) {
+					if(args[0].equals(ConfigData.s_info[i].Name)) {
+						if(ConfigData.s_info[i].enabled == flag) {
+							main.bridge.sendToDiscord(":information_source: " + ConfigData.s_info[i].Name + "サーバーは既に" + flag + "です！");
 							return;
 						}
 						if(flag) {
-							main.ServerSwitch(ConfigData.Server_info[i]);
-							ConfigData.enabled[i] = flag;
-							main.sendToDiscord(":information_source: " + ConfigData.Server_info[i][0] + "サーバーを" + flag + "にしました");
+							ConfigData.s_info[i].enabled = flag;
+							if(main.s_started) {
+								main.s_started = false;
+								ConfigData.s_info[i].Server_On();
+								main.s_started = true;
+							}
+							main.bridge.sendToDiscord(":information_source: " + ConfigData.s_info[i].Name + "サーバーを" + flag + "にしました");
 						}else {
 							if(main.s_started) {
-								main.rcon_send(ConfigData.Server_info[i] ,"stop");
+								ConfigData.s_info[i].Exec_command("stop", "", null);
 							}
-							ConfigData.enabled[i] = flag;
-							main.sendToDiscord(":information_source: " + ConfigData.Server_info[i][0] + "サーバーを" + flag + "にしました");
+							ConfigData.s_info[i].enabled = flag;
+							main.bridge.sendToDiscord(":information_source: " + ConfigData.s_info[i].Name + "サーバーを" + flag + "にしました");
 						}
 
 						return;
 					}
 				}
 
-				main.sendToDiscord("サーバーが存在しません！");
+				main.bridge.sendToDiscord("サーバーが存在しません！");
 			}else {
 				//無効なコマンドなら
-				main.sendToDiscord("無効なコマンドです");
+				main.bridge.sendToDiscord("コマンドが見つかりません");
 			}
 		}else {
 			// コマンドでなければMinecraftへ送信
-			main.sendToMinecraft(event.getMessage());
+			main.bridge.sendToMinecraft(event.getMessage());
 		}
 	}
 
+	/**
+	 * Adminかどうか確認する
+	 * @param ID 確認するユーザーID
+	 * @return Adminならtrue
+	 */
 	public boolean isAdmin(String ID) {
-		for(int i = 0; i <= ConfigData.Admin_UserID.length - 1; i++) {
+		for(int i = 0; i < ConfigData.Admin_UserID.length; i++) {
 			if(ID.equals(ConfigData.Admin_UserID[i])) {
 				return true;
 			}

@@ -22,10 +22,7 @@ Server_List:
 Server_Info:
   Server1:
     Dir: [サーバー1のディレクトリ]
-    File: [サーバー1の実行]
+    File: [サーバー1の実行ファイル名]
     Args: [引数 (-jarは不要)]
-    Rcon: [サーバーのrconのポート]
-    Rcon_passwd: [rconのパスワード]
-
-# デバッグ情報の出力(falseをお勧めします)
-debug: false
+    Use_Remote_Console: true #discordコンソール機能を使用するか
+    Console_ChannelId: [コンソールチャンネルID(Remote_Consoleがtrueの場合有効)]

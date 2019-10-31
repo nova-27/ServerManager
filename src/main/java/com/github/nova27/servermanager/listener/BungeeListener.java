@@ -1,8 +1,11 @@
 package com.github.nova27.servermanager.listener;
 
+import java.util.Objects;
+
 import com.github.nova27.servermanager.ServerManager;
 import com.github.nova27.servermanager.config.ConfigData;
 
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.event.LoginEvent;
@@ -21,55 +24,88 @@ public class BungeeListener implements Listener {
 		this.main = main;
 	}
 
+	/**
+	 * チャットが送信されたら実行
+	 * @param event チャット情報
+	 */
 	@EventHandler
-    public void onChat(ChatEvent event) {
+	public void onChat(ChatEvent event) {
 		// コマンド実行の場合
-        if ( event.isCommand() ) {
-        	String cmd = event.getMessage();
-        	String senderServer = ((ProxiedPlayer) event.getSender()).getServer().getInfo().getName();
-        	if(cmd.equals("/stop")) {
-        		for(int i = 0; i <= ConfigData.Server_info.length - 1; i++) {
-        			if (senderServer.equals(ConfigData.Server_info[i][0])) {
-        				main.sendToDiscord(":information_source: " + senderServer + "サーバーがマインクラフトから停止されました");
-        				ConfigData.enabled[i] = false;
-        			}
-        		}
-        	}
-            return;
-        }
+		if ( event.isCommand() ) {
+			String cmd = event.getMessage();
+			String senderServer = ((ProxiedPlayer) event.getSender()).getServer().getInfo().getName();
+			if(cmd.equals("/stop")) {
+				//stopコマンドが実行された場合
+				for(int i = 0; i < ConfigData.s_info.length; i++) {
+					if (senderServer.equals(ConfigData.s_info[i].Name)) {
+						main.bridge.sendToDiscord(":information_source: " + senderServer + "サーバーがマインクラフトから停止されました");
+						ConfigData.s_info[i].enabled = false;
+						ConfigData.s_info[i].switching = true;
+					}
+				}
+			}
+			return;
+		}
 
-        // プレイヤーの発言ではない場合は、そのまま無視する
-        if ( !(event.getSender() instanceof ProxiedPlayer) ) {
-            return;
-        }
+		//キャンセルされていたら
+		if (event.isCancelled()) return;
 
-        ProxiedPlayer sender = (ProxiedPlayer)event.getSender();
-        String senderServer = sender.getServer().getInfo().getName();
-        String message = event.getMessage();
+		// プレイヤーの発言ではない場合は、そのまま無視する
+		if ( !(event.getSender() instanceof ProxiedPlayer) ) {
+			return;
+		}
 
-        main.sendToDiscord( "[" + senderServer + "]" + sender + " : " + message);
-    }
+		ProxiedPlayer sender = (ProxiedPlayer)event.getSender();
+		String senderServer = sender.getServer().getInfo().getName();
+		String message = event.getMessage();
 
-    @EventHandler
-    public void onLogin(LoginEvent e) {
-    	main.PlayerCount(1);
-    	String name = e.getConnection().getName();
-    	main.sendToDiscord(":wave: " + name + "がサーバーに参加しました！");
-    	main.closetimer_stop();
-    	main.ServerSwitch();
-    }
+		main.bridge.sendToDiscord( "【" + senderServer + "】" + sender + " : " + message);
+	}
 
-    @EventHandler
-    public void onLogout(PlayerDisconnectEvent e) {
-    	main.PlayerCount(-1);
-    	String sendText = "";
-    	String name = e.getPlayer().getName();
-    	sendText += ":wave: " + name + "がサーバーから退出しました！\n";
+	/**
+	 * ログインされたら
+	 * @param e ログイン情報
+	 */
+	@EventHandler
+	public void onLogin(LoginEvent e) {
+		main.bridge.PlayerCount(1);
+		String name = e.getConnection().getName();
+		main.bridge.sendToDiscord(":wave: " + name + "がサーバーに参加しました！");
+		main.closetimer_stop();
 
-    	if (main.PlayerCount(0) == 0) {
-    		main.closetimer();
-    		sendText += ":alarm_clock: " + ConfigData.close_time + "分後に各サーバーが停止します";
-    	}
-    	main.sendToDiscord(sendText);
-    }
+		//一人目の場合
+		if(main.bridge.PlayerCount(0) == 1) {
+			if (!main.s_started) {
+				//起動していなかったら、キック
+				e.getConnection().disconnect(new TextComponent("サーバーを起動します。もうしばらくお待ち下さい。"));
+			}
+
+			//サーバー起動
+			for(int i = 0; i < ConfigData.s_info.length;i++) {
+				if(Objects.equals(ConfigData.s_info[i].Name,"lobby") && ConfigData.s_info[i].switching) {
+					//ロビーサーバーが起動中だったら
+					e.getConnection().disconnect(new TextComponent("サーバーを起動しています。もうしばらくお待ち下さい。"));
+				}
+				ConfigData.s_info[i].Server_On();
+			}
+			main.s_started = true;
+		}
+	}
+
+	/**
+	 * ログアウトされたら
+	 * @param e ログアウト情報
+	 */
+	@EventHandler
+	public void onLogout(PlayerDisconnectEvent e) {
+		main.bridge.PlayerCount(-1);
+		String name = e.getPlayer().getName();
+		main.bridge.sendToDiscord(":wave: " + name + "がサーバーから退出しました！\n");
+
+		if (main.bridge.PlayerCount(0) == 0) {
+			//0人になったら
+			main.closetimer();
+			main.bridge.sendToDiscord(":alarm_clock: " + ConfigData.close_time + "分後に各サーバーが停止します");
+		}
+	}
 }

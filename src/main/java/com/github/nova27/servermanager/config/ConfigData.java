@@ -12,9 +12,5 @@ public class ConfigData {
     public static int close_time = 0;
     public static String IP = "";
     public static String Port = "";
-    public static String[][] Server_info;
-
-    public static boolean debug;
-
-    public static boolean[] enabled;
+    public static Server_info[] s_info;
 }
