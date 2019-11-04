@@ -11,7 +11,8 @@ public class Log_getter_thread extends Thread {
 	private Server_info s_info;
 	private BufferedReader br;
 	private Log_getter_event event;
-	private boolean isActive = true;
+
+	private boolean stopped = false;
 
 	/**
 	 * サーバープロセスのログを取得します
@@ -26,23 +27,23 @@ public class Log_getter_thread extends Thread {
 	}
 
 	/**
-	 * スレッドをストップする
+	 * スレッドを停止する
 	 */
-	public void stopThread() {
-		isActive  = false;
+	public void thread_stop() {
+		stopped = true;
 	}
 
 	/**
 	 * ログを処理する
 	 */
-	@Override
 	public void run() {
 		try {
-			while(isActive) {
-				if(br.ready()) {
+			while (!stopped) {
+				if (br.ready()) {
 					//ログを取得
 					String line = br.readLine();
-					if (line == null) 	break;
+					if (line == null)
+						break;
 					if (Objects.equals(line, "")) {
 						continue;
 					}
@@ -50,7 +51,7 @@ public class Log_getter_thread extends Thread {
 					//不要な部分を削除
 					line = line.replaceFirst("\\[[0-9]+:[0-9]+:[0-9]+ .+\\]:\\s+", "");
 
-					if(s_info.start_write >= s_info.BUF_LOG_CNT) {
+					if (s_info.start_write >= s_info.BUF_LOG_CNT) {
 						s_info.start_write = 0;
 					}
 					//配列に書き込む
@@ -59,9 +60,13 @@ public class Log_getter_thread extends Thread {
 
 					event.log_got(line);
 				}
+
+				sleep(100);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		} finally {
 			try {
 				br.close();

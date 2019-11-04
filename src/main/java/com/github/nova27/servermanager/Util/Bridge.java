@@ -12,7 +12,8 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 
 public class Bridge {
-	ServerManager main;
+	private ServerManager main;
+	private Discord_send main_channel;
 
 	/**
 	 * コンストラクタ
@@ -20,6 +21,8 @@ public class Bridge {
 	 */
 	public Bridge(ServerManager main) {
 		this.main = main;
+		main_channel = new Discord_send(main);
+		main_channel.start();
 	}
 
 	/**
@@ -31,11 +34,11 @@ public class Bridge {
 	}
 
 	/**
-	 * Discordへメッセージを送信
+	 * Discordメインチャンネルへメッセージを送信
 	 * @param message 送信するメッセージ
 	 */
 	public void sendToDiscord(String message) {
-		main.jda().getTextChannelById(ConfigData.ChannelId).sendMessage(message).queue();
+		main_channel.add_queue(message);
 	}
 
 	/**
@@ -57,7 +60,20 @@ public class Bridge {
 			eb.addField(obj[0], obj[1], false);
 		}
 
-		main.jda().getTextChannelById(ConfigData.ChannelId).sendMessage(eb.build()).queue();
+		main.jda().getTextChannelById(ConfigData.ChannelId).sendMessage(eb.build()).complete();
+	}
+
+	/**
+	 * Discordへのメッセージ送信を停止
+	 */
+	public void SendToDiscord_stop() {
+		main_channel.thread_stop();
+		try {
+			main_channel.join();
+		} catch (InterruptedException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
 	}
 
 	/**

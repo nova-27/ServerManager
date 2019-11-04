@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import com.github.nova27.servermanager.ServerManager;
 import com.github.nova27.servermanager.config.ConfigData;
+import com.gmail.necnionch.myplugin.n8chatcaster.bungee.N8ChatCasterAPI;
 
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -55,11 +56,15 @@ public class BungeeListener implements Listener {
 			return;
 		}
 
-		ProxiedPlayer sender = (ProxiedPlayer)event.getSender();
-		String senderServer = sender.getServer().getInfo().getName();
-		String message = event.getMessage();
+		N8ChatCasterAPI chatCasterApi = this.main.getChatCasterApi();
+		if (chatCasterApi == null || !chatCasterApi.isEnabledChatCaster()) {
+			// 連携プラグインが無効の場合
+			ProxiedPlayer sender = (ProxiedPlayer)event.getSender();
+			String senderServer = sender.getServer().getInfo().getName();
+			String message = event.getMessage();
 
-		main.bridge.sendToDiscord( "【" + senderServer + "】" + sender + " : " + message);
+			main.bridge.sendToDiscord( "【" + senderServer + "】" + sender + " : " + message);
+		}
 	}
 
 	/**

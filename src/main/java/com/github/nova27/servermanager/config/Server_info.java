@@ -13,7 +13,7 @@ import com.github.nova27.servermanager.Util.Log_getter_thread;
 public class Server_info implements Log_getter_event {
 	public final int BUF_LOG_CNT = 30;
 
-	private ServerManager main;
+	public ServerManager main;
 
 	public String Name;
 	public String Dir;
@@ -103,7 +103,6 @@ public class Server_info implements Log_getter_event {
 		}
 
 		//実行結果取得スレッドを実行
-		//TODO
 		Com_result_thread get_result = new Com_result_thread(this, match, com_result_event);
 		get_result.start();
 
@@ -118,29 +117,42 @@ public class Server_info implements Log_getter_event {
 	public void log_got(String line) {
 		//コンソールチャンネルIDが存在するなら、送信
 		if(Console_ChannelId != null) {
+			//TODO
 			main.jda().getTextChannelById(Console_ChannelId).sendMessage(line).queue();
 		}
 
 		//起動が完了した場合
-		if(line.matches("Done \\(.+\\)! For help, type \"help\"")) {
+		if(line.matches("Done \\(\\d+\\.\\d+s\\)!.*")) {
 			switching = false;
 			main.log(Name + "サーバーの起動が完了しました");
 			main.bridge.sendToDiscord(":ballot_box_with_check: " + Name +  "サーバーの起動が完了しました！");
 		}
 		//サーバーが停止した場合
 		if(line.matches("Saving worlds")) {
-			log_getter.stopThread();
-			try {
-				log_getter.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			log_getter.thread_stop();
 
-			main.log(Name + "サーバーが停止しました");
-			main.bridge.sendToDiscord(":ballot_box_with_check: " + Name +  "サーバーが停止しました！");
+			Thread func_after_logget = new Thread() {
+				public void run() {
+					//ログ取得スレッド終了待機
+					try {
+						log_getter.join();
+					} catch (InterruptedException e) {
+						// TODO 自動生成された catch ブロック
+						e.printStackTrace();
+					}
+					//ログ取得スレッド初期化
+					log_getter = null;
+					logs = new String[BUF_LOG_CNT];
+					start_write = 0;
 
-			switching = false;
-			enabled = false;
+					//ステータス切り替え
+					main.log(Name + "サーバーが停止しました");
+					main.bridge.sendToDiscord(":ballot_box_with_check: " + Name +  "サーバーが停止しました！");
+					switching = false;
+				};
+			};
+
+			func_after_logget.start();
 		}
 	}
 }

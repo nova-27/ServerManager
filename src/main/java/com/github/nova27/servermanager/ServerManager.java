@@ -13,7 +13,10 @@ import com.github.nova27.servermanager.Util.Bridge;
 import com.github.nova27.servermanager.config.ConfigData;
 import com.github.nova27.servermanager.config.Config_get;
 import com.github.nova27.servermanager.listener.BungeeListener;
+import com.github.nova27.servermanager.listener.ChatCasterListener;
 import com.github.nova27.servermanager.listener.DiscordListener;
+import com.gmail.necnionch.myplugin.n8chatcaster.bungee.N8ChatCasterAPI;
+import com.gmail.necnionch.myplugin.n8chatcaster.bungee.N8ChatCasterPlugin;
 
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
@@ -32,6 +35,9 @@ public class ServerManager extends Plugin {
 	public boolean s_started = false;
 	private Timer timer = null;
 
+	//連携用
+	private N8ChatCasterAPI chatCasterApi = null;
+
 	/**
 	 * プラグインが有効になったとき
 	 */
@@ -39,6 +45,13 @@ public class ServerManager extends Plugin {
 	public void onEnable() {
 		//イベント登録
 		getProxy().getPluginManager().registerListener(this, new BungeeListener(this));
+
+		//プラグイン連携
+		Plugin temp = getProxy().getPluginManager().getPlugin("N8ChatCaster");
+		if (temp instanceof N8ChatCasterPlugin) {
+			chatCasterApi = (((N8ChatCasterPlugin) temp).getChatCasterApi());
+			getProxy().getPluginManager().registerListener(this, new ChatCasterListener(this));
+		}
 
 		super.onEnable();
 	}
@@ -53,14 +66,14 @@ public class ServerManager extends Plugin {
 			File folder = new File(
 					ProxyServer.getInstance().getPluginsFolder(),
 					"ServerManagerForBungeeCord");
-			if ( !folder.exists() ) {
+			if (!folder.exists()) {
 				//存在しなければ作成
 				folder.mkdirs();
 			}
 
 			//configファイル
 			plugin_config = new File(folder, "config.yml");
-			if ( !plugin_config.exists() ) {
+			if (!plugin_config.exists()) {
 				//存在しなければコピー
 				log("設定ファイルが存在しないため、テンプレートが作成されました。");
 				InputStream srcIs = getClass().getResourceAsStream("/config.yml");
@@ -70,7 +83,7 @@ public class ServerManager extends Plugin {
 			//bungee_configファイル
 			bungee_config = new File(
 					"config.yml");
-			if ( !bungee_config.exists() ) {
+			if (!bungee_config.exists()) {
 				log("bungeecordのconfigファイルが見つかりません");
 			}
 		} catch (IOException e) {
@@ -100,22 +113,34 @@ public class ServerManager extends Plugin {
 	 */
 	@Override
 	public void onDisable() {
-    	//サーバーが起動していたら停止
-    	if (s_started == true) {
-    		getLogger().info("各サーバーの停止");
+		//サーバーが起動していたら停止
+		if (s_started == true) {
+			getLogger().info("各サーバーの停止");
 			bridge.sendToDiscord(":exclamation: 各サーバーを停止しています...");
-			for(int i=0; i < ConfigData.s_info.length; i++) {
+			for (int i = 0; i < ConfigData.s_info.length; i++) {
 				ConfigData.s_info[i].Exec_command("stop", "", null);
+
+				ConfigData.s_info[i].enabled = false;
+				ConfigData.s_info[i].switching = true;
 			}
+		}
 
-			//処理終了まで待機
-			for(int i = 0; i < ConfigData.s_info.length; i++) {
-	    		while(ConfigData.s_info[i].enabled || ConfigData.s_info[i].switching) {
-	    		}
-	    	}
-    	}
+		//停止まで待機
+		for (int i = 0; i < ConfigData.s_info.length; i++) {
+			if (ConfigData.s_info[i].switching || ConfigData.s_info[i].enabled) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO 自動生成された catch ブロック
+					e.printStackTrace();
+				}
+			}
+		}
 
-		jda.getTextChannelById(ConfigData.ChannelId).sendMessage(":octagonal_sign: " + ConfigData.ServerName + "サーバーのプロキシが停止します").queue();
+		//ボットの停止
+		jda.getTextChannelById(ConfigData.ChannelId)
+		.sendMessage(":octagonal_sign: " + ConfigData.ServerName + "サーバーのプロキシが停止します").complete();
+		bridge.SendToDiscord_stop();
 		jda.shutdown();
 
 		super.onDisable();
@@ -141,27 +166,37 @@ public class ServerManager extends Plugin {
 	 */
 	public void closetimer() {
 		if (task == null) {
-            task = new TimerTask() {
-        		@Override
-        		public void run() {
-        			getLogger().info("各サーバーの停止");
-        			bridge.sendToDiscord(":exclamation: 各サーバーが停止します");
-        			for(int i = 0; i < ConfigData.s_info.length; i++) {
-        				ConfigData.s_info[i].Exec_command("stop", "", null);
-        			}
-        			s_started = false;
-        		}
-            };
-        }
+			task = new TimerTask() {
+				@Override
+				public void run() {
+					getLogger().info("各サーバーの停止");
+					bridge.sendToDiscord(":exclamation: 各サーバーが停止します");
+					for (int i = 0; i < ConfigData.s_info.length; i++) {
+						ConfigData.s_info[i].Exec_command("stop", "", null);
+					}
+					s_started = false;
+				}
+			};
+		}
 		timer = new Timer();
-        timer.schedule(task, ConfigData.close_time * 60000);
+		timer.schedule(task, ConfigData.close_time * 60000);
 	}
 
 	/**
 	 * タイマーのストップ
 	 */
 	public void closetimer_stop() {
-		task.cancel();
-		task = null;
+		if(task != null) {
+			task.cancel();
+			task = null;
+		}
+	}
+
+	/**
+	 * 連携プラグインAPIのゲッター
+	 * @return API
+	 */
+	public N8ChatCasterAPI getChatCasterApi() {
+		return chatCasterApi;
 	}
 }

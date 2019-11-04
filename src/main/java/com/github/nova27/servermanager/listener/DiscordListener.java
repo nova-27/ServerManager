@@ -56,7 +56,7 @@ public class DiscordListener extends ListenerAdapter {
 		String FirstChar = ConfigData.FirstChar;
 		if (event.getMessage().getContentRaw().startsWith(FirstChar)) {
 			String command = event.getMessage().getContentRaw().replace(FirstChar, "").split(" ")[0];
-			String[] args = event.getMessage().getContentRaw().replace(FirstChar + command + "\\s+", "").split("\\s+");
+			String[] args = event.getMessage().getContentRaw().replaceAll(FirstChar + command + "\\s+", "").split("\\s+");
 
 			if (command.equalsIgnoreCase("help")) {
 				//helpコマンド
@@ -161,7 +161,7 @@ public class DiscordListener extends ListenerAdapter {
 				}
 
 				if(args.length < 2) {
-					main.bridge.sendToDiscord("コマンドの構文が間違っています！");
+					main.bridge.sendToDiscord("コマンドの構文が間違っています！" + args.toString());
 					return;
 				}
 
