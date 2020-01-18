@@ -1,28 +1,52 @@
 # DiscordBotに関する設定
-Token: [BOTのトークン]
-ChannelId: [チェンネルID]
-PlayGame: [BOTがプレイ中のゲーム]
+# Discord bot settings
+Token: [BOTのトークン(Bot token)]
+ChannelId: [チェンネルID(Channel ID)]
+PlayingGame: [BOTがプレイ中のゲーム(The game the bot is playing)]
 
-# 管理コマンドを実行できるユーザー(ID)
+# 管理コマンドを実行できるユーザーID(Discord)
+# User ID that can execute management commands(Discord)
 Admin:
-- [ユーザーID]
+- [ユーザーID(User ID)]
 
 # Minecraftサーバーに関する設定
-ServerName: [サーバーの名前]
+# Minecraft server settings
+ServerName: [サーバーの名前(Server name)]
 
 # Discord コマンドに関する設定
-FirstChar: [BOTコマンドの最初の文字]
+# Discord commands settings
+FirstString: [BOTコマンドの最初の文字列(First string of BOT commands)]
 
-# 省電力自動クローズ機能
-time: [全プレイヤー退出の何分後に閉じるか]
+# Minecraft Discord 相互送信形式
+# Minecraft Discord Mutual transmission format
+ToDiscord: 【{0}】 {1} ： {2}
+ToMinecraft: §1[Discord] §f<{0}> {1}
 
-# 各サーバーの設定
+# 省電力自動サーバー停止機能
+# Power saving automatic server stop function
+CloseTime: [全プレイヤー退出の何分後に閉じるか(How many minutes after all players leave to close)]
+
+# 各サーバーの設定 (Server Settings)
+# [形式(Format)]
+# ServerList:
+# - {ID}
+# Server:
+#   {ID}:
+#     Name: ...
+# {ID}は Bungeecordのconfig.ymlと同じでなければいけません
+# ({ID} must be the same as the setting in Bungeecord config.yml)
 Server_List:
 - Server1
-Server_Info:
+Server:
   Server1:
-    Dir: [サーバー1のディレクトリ]
-    File: [サーバー1の実行ファイル名]
-    Args: [引数 (-jarは不要)]
-    Use_Remote_Console: true #discordコンソール機能を使用するか
-    Console_ChannelId: [コンソールチャンネルID(Remote_Consoleがtrueの場合有効)]
+    Name: [サーバーの名前(ServerName)]
+    Dir: [サーバー1のディレクトリ(Server root directory)]
+    File: [サーバー1の実行ファイル名(Server jar file name)]
+    Args: [引数(-jarは不要) (Arguments [Don't include -jar argument])]
+    Use_Remote_Console: true #discordコンソール機能を使用するか(Whether to use the discord console function)
+    Console_ChannelId: [コンソールチャンネルID(Remote_Consoleがtrueの場合有効) (Console channel ID[It is allow when "Use_Remote_Console" is true])]
+    advanced:
+      LogDeleteRegex: \[[0-9]+:[0-9]+:[0-9]+ .+\]:\s+
+      LogServerStartingDone: Done \(\d+\.\d+s\)!.*
+      LogServerStopped: Saving worlds
+      LogListCmd: There are.+of a max.+players online:.+

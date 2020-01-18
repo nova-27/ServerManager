@@ -1,116 +1,185 @@
 package com.github.nova27.servermanager.listener;
 
-import java.util.Objects;
-
 import com.github.nova27.servermanager.ServerManager;
 import com.github.nova27.servermanager.config.ConfigData;
+import com.github.nova27.servermanager.config.Server;
+import com.github.nova27.servermanager.utils.Bridge;
+import com.github.nova27.servermanager.utils.Messages;
+import com.github.nova27.servermanager.utils.minecraft.StandardEventListener;
 import com.gmail.necnionch.myplugin.n8chatcaster.bungee.N8ChatCasterAPI;
-
+import com.sun.jndi.cosnaming.CNCtx;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.ChatEvent;
-import net.md_5.bungee.api.event.LoginEvent;
-import net.md_5.bungee.api.event.PlayerDisconnectEvent;
+import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
+import java.lang.invoke.SwitchPoint;
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * BungeeCordイベントリスナー
+ */
 public class BungeeListener implements Listener {
-	private final ServerManager main;
+    private final ServerManager main;
+    public static Server Lobby;
 
-	/**
-	 * コンストラクタ
-	 * @param main ServerManagerのオブジェクト
-	 */
-	public BungeeListener(ServerManager main) {
-		this.main = main;
-	}
+    private static String sendToDiscordFormat;
 
-	/**
-	 * チャットが送信されたら実行
-	 * @param event チャット情報
-	 */
-	@EventHandler
-	public void onChat(ChatEvent event) {
-		// コマンド実行の場合
-		if ( event.isCommand() ) {
-			String cmd = event.getMessage();
-			String senderServer = ((ProxiedPlayer) event.getSender()).getServer().getInfo().getName();
-			if(cmd.equals("/stop")) {
-				//stopコマンドが実行された場合
-				for(int i = 0; i < ConfigData.s_info.length; i++) {
-					if (senderServer.equals(ConfigData.s_info[i].Name)) {
-						main.bridge.sendToDiscord(":information_source: " + senderServer + "サーバーがマインクラフトから停止されました");
-						ConfigData.s_info[i].enabled = false;
-						ConfigData.s_info[i].switching = true;
-					}
-				}
-			}
-			return;
-		}
+    /**
+     * Discord宛て送信のフォーマット
+     * @param format フォーマット
+     */
+    public static void setSendToDiscordFormat(String format) {
+        sendToDiscordFormat = format;
+    }
 
-		//キャンセルされていたら
-		if (event.isCancelled()) return;
+    /**
+     * コンストラクタ
+     * @param main ServerManagerのオブジェクト
+     */
+    public BungeeListener(ServerManager main) {
+        this.main = main;
+    }
 
-		// プレイヤーの発言ではない場合は、そのまま無視する
-		if ( !(event.getSender() instanceof ProxiedPlayer) ) {
-			return;
-		}
+    /**
+     * チャットが送信されたら実行
+     * @param event チャット情報
+     */
+    @EventHandler
+    public void onChat(ChatEvent event) {
+        //コマンドなら
+        if(event.isCommand()){
+            return;
+        }
 
-		N8ChatCasterAPI chatCasterApi = this.main.getChatCasterApi();
-		if (chatCasterApi == null || !chatCasterApi.isEnabledChatCaster()) {
-			// 連携プラグインが無効の場合
-			ProxiedPlayer sender = (ProxiedPlayer)event.getSender();
-			String senderServer = sender.getServer().getInfo().getName();
-			String message = event.getMessage();
+        //キャンセルされていたら
+        if (event.isCancelled()) return;
 
-			main.bridge.sendToDiscord( "【" + senderServer + "】" + sender + " : " + message);
-		}
-	}
+        // プレイヤーの発言ではない場合は、そのまま無視する
+        if ( !(event.getSender() instanceof ProxiedPlayer) ) {
+            return;
+        }
 
-	/**
-	 * ログインされたら
-	 * @param e ログイン情報
-	 */
-	@EventHandler
-	public void onLogin(LoginEvent e) {
-		main.bridge.PlayerCount(1);
-		String name = e.getConnection().getName();
-		main.bridge.sendToDiscord(":wave: " + name + "がサーバーに参加しました！");
-		main.closetimer_stop();
+        N8ChatCasterAPI chatCasterApi = this.main.getChatCasterApi();
+        if (chatCasterApi == null || !chatCasterApi.isEnabledChatCaster()) {
+            // 連携プラグインが無効の場合
+            ProxiedPlayer sender = (ProxiedPlayer)event.getSender();
+            String senderServer = sender.getServer().getInfo().getName();
+            String message = event.getMessage();
 
-		//一人目の場合
-		if(main.bridge.PlayerCount(0) == 1) {
-			if (!main.s_started) {
-				//起動していなかったら、キック
-				e.getConnection().disconnect(new TextComponent("サーバーを起動します。もうしばらくお待ち下さい。"));
-			}
+            main.bridge.sendToDiscord(Bridge.Formatter(sendToDiscordFormat, senderServer, sender.toString(), message));
+        }
+    }
 
-			//サーバー起動
-			for(int i = 0; i < ConfigData.s_info.length;i++) {
-				if(Objects.equals(ConfigData.s_info[i].Name,"lobby") && ConfigData.s_info[i].switching) {
-					//ロビーサーバーが起動中だったら
-					e.getConnection().disconnect(new TextComponent("サーバーを起動しています。もうしばらくお待ち下さい。"));
-				}
-				ConfigData.s_info[i].Server_On();
-			}
-			main.s_started = true;
-		}
-	}
+    /**
+     * ログインされたら
+     * @param e ログイン情報
+     */
+    @EventHandler
+    public void onLogin(LoginEvent e) {
+        main.bridge.PlayerCount(1);
+        String name = e.getConnection().getName();
+        main.bridge.sendToDiscord(Bridge.Formatter(Messages.JoinedTheGame.toString(), name));
+        Lobby.StopTimer();
 
-	/**
-	 * ログアウトされたら
-	 * @param e ログアウト情報
-	 */
-	@EventHandler
-	public void onLogout(PlayerDisconnectEvent e) {
-		main.bridge.PlayerCount(-1);
-		String name = e.getPlayer().getName();
-		main.bridge.sendToDiscord(":wave: " + name + "がサーバーから退出しました！\n");
+        //一人目の場合
+        if(main.bridge.PlayerCount(0) == 1) {
+            //サーバーを起動
+            if (!Lobby.Started) {
+                //起動していなかったら、キック
+                e.getConnection().disconnect(new TextComponent(Messages.BungeeNotStarted.toString()));
+                main.bridge.PlayerCount(-1);
 
-		if (main.bridge.PlayerCount(0) == 0) {
-			//0人になったら
-			main.closetimer();
-			main.bridge.sendToDiscord(":alarm_clock: " + ConfigData.close_time + "分後に各サーバーが停止します");
-		}
-	}
+                Lobby.Server_On();
+            }
+            else if (Lobby.Switching){
+                //処理中だったら、キック
+                e.getConnection().disconnect(new TextComponent(Messages.BungeeSwitching.toString()));
+                main.bridge.PlayerCount(-1);
+            }
+        }
+    }
+
+    /**
+     * ログアウトされたら
+     * @param e ログアウト情報
+     */
+    @EventHandler
+    public void onLogout(PlayerDisconnectEvent e) {
+        main.bridge.PlayerCount(-1);
+        String name = e.getPlayer().getName();
+        main.bridge.sendToDiscord(Bridge.Formatter(Messages.LeavedTheGame.toString(), name));
+
+        if (main.bridge.PlayerCount(0) == 0) {
+            //0人になったら
+            Lobby.StartTimer();
+            main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerStarted_Discord.toString(), ""+ConfigData.CloseTime, Lobby.Name));
+            main.log(Bridge.Formatter(Messages.TimerStarted_Log.toString(), ""+ConfigData.CloseTime, Lobby.Name));
+        }
+    }
+
+    @EventHandler
+    public void onSwitch(ServerSwitchEvent e) {
+        for(int i = 0; i < ConfigData.Server.length; i++) {
+            //ロビーサーバーは停止しない
+            if(ConfigData.Server[i] == Lobby) {
+                continue;
+            }
+
+            //タイマーのストップ
+            if(ConfigData.Server[i].ID.equals(e.getPlayer().getServer().getInfo().getName())) {
+                ConfigData.Server[i].StopTimer();
+                continue;
+            }
+
+            if(ConfigData.Server[i].Started && !ConfigData.Server[i].Switching) {
+                final int f_i = i;
+
+                Timer timer = new Timer(false);
+                TimerTask task = new TimerTask() {
+                    @Override
+                    public void run() {
+                        final int[] result = new int[]{0};
+                        ConfigData.Server[f_i].Exec_command("list", ConfigData.Server[f_i].getLogListCmd(), new StandardEventListener() {
+                            @Override
+                            public void exec(String result_tmp) {
+                                Matcher m = Pattern.compile("[0-9]+").matcher(result_tmp);
+
+                                if(m.find()) {
+                                    if (Integer.parseInt(m.group()) == 0) {
+                                        result[0] = 1;
+                                    }else{
+                                        result[0] = 2;
+                                    }
+                                }
+                            }
+                        });
+
+                        while(result[0] == 0){
+                            //処理が終わるまで待機
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                        if(result[0] == 1) {
+                            //0人なら起動
+                            main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerStarted_Discord.toString(), ""+ConfigData.CloseTime, ConfigData.Server[f_i].Name));
+                            main.log(Bridge.Formatter(Messages.TimerStarted_Log.toString(), ""+ConfigData.CloseTime, ConfigData.Server[f_i].Name));
+                            ConfigData.Server[f_i].StartTimer();
+                        }
+                    }
+                };
+                timer.schedule(task, 3000);
+            }
+        }
+    }
 }

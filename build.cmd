@@ -12,5 +12,4 @@ rem サーバーの起動
 cd /d %MOVETO%\..\
 java -Xms512M -Xmx512M -jar BungeeCord.jar
 
-pause
 exit
