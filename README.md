@@ -16,4 +16,4 @@ By using this tool, you can manage Minecraft BungeCord from Discord and the serv
 ・You can check the status of the server by using the command from discord.
 
 <h2>How to setup</h2>
-See <a href="wiki">wiki</a>.
+See <a href="https://github.com/nova-27/ServerManager/wiki">wiki</a>.
