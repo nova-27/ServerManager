@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="N8ChatCaster">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/N8ChatCaster.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
