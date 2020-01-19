@@ -6,4 +6,14 @@
 By using this tool, you can manage Minecraft BungeCord from Discord and the servers under its control.
 
 <h2>Feature</h2>
-・Send messages sent to Minecraft or Discord to each other.
+<h3>Share chat</h3>
+・Send messages that sent to Minecraft or Discord to each other.
+<h3>Save PC resources</h3>
+・After the specified time elapses, the servers under BungeCord management are automatically closed.<br>
+・If you try to log in to the server while the plugin is closing the server, the server will start automatically.<br>
+・You can leave the specified server down.
+<h3>Check the status of server from Discord</h3>
+・You can check the status of the server by using the command from discord.
+
+<h2>How to setup</h2>
+See <a href="wiki">wiki</a>.
