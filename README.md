@@ -3,13 +3,13 @@
 <a href="https://github.com/nova-27/ServerManager/blob/master/LICENSE"><img alt="license" src="https://img.shields.io/github/license/nova-27/ServerManager?color=b8b8b8"></a>
 
 <h1>ServerManager</h1>
-By using this tool, you can manage Minecraft BungeeCord from Discord and the servers under its control.
+By using this tool, you can manage Minecraft BungeeCord and the servers under its control from Discord.
 
 <h2>Feature</h2>
 <h3>Share chat</h3>
 ・Send messages that sent to Minecraft or Discord to each other.
 <h3>Save PC resources</h3>
-・After the specified time elapses, the servers under BungeCord management are automatically closed.<br>
+・After the specified time elapses, the servers under BungeeCord management are automatically closed.<br>
 ・If you try to log in to the server while the plugin is closing the server, the server will start automatically.<br>
 ・You can leave the specified server down.
 <h3>Check the status of server from Discord</h3>
