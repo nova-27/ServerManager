@@ -88,6 +88,9 @@ public class BungeeListener implements Listener {
         String name = e.getConnection().getName();
         main.bridge.sendToDiscord(Bridge.Formatter(Messages.JoinedTheGame.toString(), name));
         Lobby.StopTimer();
+        main.log(Bridge.Formatter(Messages.TimerStopped_Log.toString(), Lobby.Name));
+        main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerStopped_Discord.toString(), Lobby.Name));
+        ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.TimerStopped_Minecraft.toString(), Lobby.Name)));
 
         //一人目の場合
         if(main.bridge.PlayerCount(0) == 1) {
@@ -136,6 +139,9 @@ public class BungeeListener implements Listener {
             //タイマーのストップ
             if(ConfigData.Server[i].ID.equals(e.getPlayer().getServer().getInfo().getName())) {
                 ConfigData.Server[i].StopTimer();
+                main.log(Bridge.Formatter(Messages.TimerStopped_Log.toString(), ConfigData.Server[i].Name));
+                main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerStopped_Discord.toString(), ConfigData.Server[i].Name));
+                ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.TimerStopped_Minecraft.toString(), ConfigData.Server[i].Name)));
                 continue;
             }
 
@@ -174,6 +180,7 @@ public class BungeeListener implements Listener {
                             //0人なら起動
                             main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerStarted_Discord.toString(), ""+ConfigData.CloseTime, ConfigData.Server[f_i].Name));
                             main.log(Bridge.Formatter(Messages.TimerStarted_Log.toString(), ""+ConfigData.CloseTime, ConfigData.Server[f_i].Name));
+                            ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.TimerStarted_Minecraft.toString(), ""+ConfigData.CloseTime, ConfigData.Server[f_i].Name)));
                             ConfigData.Server[f_i].StartTimer();
                         }
                     }

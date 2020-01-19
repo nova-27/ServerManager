@@ -7,6 +7,8 @@ import com.github.nova27.servermanager.utils.Messages;
 import com.github.nova27.servermanager.utils.minecraft.GetCommandResultThread;
 import com.github.nova27.servermanager.utils.minecraft.GetLogsThread;
 import com.github.nova27.servermanager.utils.minecraft.StandardEventListener;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.TextComponent;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -117,6 +119,7 @@ public class Server implements StandardEventListener {
 
                 main.log(Bridge.Formatter(Messages.ServerStarting_Log.toString(), Name));
                 main.bridge.sendToDiscord(Bridge.Formatter(Messages.ServerStarting_Discord.toString(), Name));
+                ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.ServerStarting_Minecraft.toString(), Name)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -180,6 +183,7 @@ public class Server implements StandardEventListener {
                         //処理中でなかったら
                         main.log(Bridge.Formatter(Messages.ServerStopping_Log.toString(), Name));
                         main.bridge.sendToDiscord(Bridge.Formatter(Messages.ServerStopping_Discord.toString(), Name));
+                        ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.ServerStopping_Minecraft.toString(), Name)));
 
                         Exec_command("stop", "", null);
                         Started = false;
@@ -188,6 +192,7 @@ public class Server implements StandardEventListener {
                         //処理中だったら見送り
                         main.log(Bridge.Formatter(Messages.TimerRestarted_Log.toString(), Name));
                         main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerRestarted_Discord.toString(), Name));
+                        ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.TimerRestarted_Minecraft.toString(), Name)));
 
                         TimerTask task = this;
                         timer = new Timer();
@@ -226,6 +231,7 @@ public class Server implements StandardEventListener {
             Switching = false;
             main.log(Bridge.Formatter(Messages.ServerStarted_Log.toString(), Name));
             main.bridge.sendToDiscord(Bridge.Formatter(Messages.ServerStarted_Discord.toString(), Name));
+            ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.ServerStarted_Minecraft.toString(), Name)));
         }
         //サーバーが停止した場合
         else if(line.matches(ServerStopped)) {
@@ -250,6 +256,7 @@ public class Server implements StandardEventListener {
                     //ステータス切り替え
                     main.log(Bridge.Formatter(Messages.ServerStopped_Log.toString(), Name));
                     main.bridge.sendToDiscord(Bridge.Formatter(Messages.ServerStopped_Discord.toString(), Name));
+                    ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.ServerStopped_Minecraft.toString(), Name)));
                     Switching = false;
                 };
             };

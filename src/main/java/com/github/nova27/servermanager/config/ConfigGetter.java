@@ -9,8 +9,7 @@ import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,12 +86,35 @@ public class ConfigGetter {
         ConfigData.IP = IPortGetter.getIP();
         ConfigData.Port = IPortGetter.getPort(bungee_config);
 
-        //TODO ロビーサーバー
+        //ロビーサーバー名を取得
+        String lobby_name = getLobbyName(bungee_config);
         for(int i = 0; i < ConfigData.Server.length; i++) {
-            if ("lobby".equals(ConfigData.Server[i].ID)) {
+            if (lobby_name.equals(ConfigData.Server[i].ID)) {
                 BungeeListener.Lobby = ConfigData.Server[i];
                 break;
             }
         }
+    }
+
+    /**
+     * ロビーサーバーを特定する
+     */
+    private static String getLobbyName(File bungee_config) {
+        String name="  - lobby";
+        try (BufferedReader in = new BufferedReader(new FileReader(bungee_config))){
+            String line;
+            while((line = in.readLine()) != null) {
+                if(line.contains("priorities:")) {
+                    name = in.readLine();
+                    break;
+                }
+            }
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+
+        return name.replaceAll("\\s*\\-\\s*", "");
     }
 }
