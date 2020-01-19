@@ -3,7 +3,7 @@
 <a href="https://github.com/nova-27/ServerManager/blob/master/LICENSE"><img alt="license" src="https://img.shields.io/github/license/nova-27/ServerManager?color=b8b8b8"></a>
 
 <h1>ServerManager</h1>
-By using this tool, you can manage Minecraft BungeCord from Discord and the servers under its control.
+By using this tool, you can manage Minecraft BungeeCord from Discord and the servers under its control.
 
 <h2>Feature</h2>
 <h3>Share chat</h3>
