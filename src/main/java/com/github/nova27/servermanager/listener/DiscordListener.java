@@ -7,11 +7,9 @@ import com.github.nova27.servermanager.utils.Bridge;
 import com.github.nova27.servermanager.utils.Messages;
 import com.github.nova27.servermanager.utils.minecraft.StandardEventListener;
 import net.dv8tion.jda.core.entities.Game;
-import net.dv8tion.jda.core.entities.MessageActivity;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import sun.security.krb5.Config;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -163,7 +161,7 @@ public class DiscordListener extends ListenerAdapter {
                 thread.start();
             }else if(command.equalsIgnoreCase("enabled")){
                 //Adminかどうか
-                if (!isAdmin(event.getGuild().getId())) {
+                if (!isAdmin(event.getAuthor().getId())) {
                     main.bridge.sendToDiscord(Messages.EnabledCommand_permission.toString());
                     return;
                 }
