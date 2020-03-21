@@ -7,17 +7,16 @@ import com.github.nova27.servermanager.utils.Bridge;
 import com.github.nova27.servermanager.utils.Messages;
 import com.github.nova27.servermanager.utils.minecraft.StandardEventListener;
 import com.gmail.necnionch.myplugin.n8chatcaster.bungee.N8ChatCasterAPI;
-import com.sun.jndi.cosnaming.CNCtx;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.*;
+import net.md_5.bungee.api.event.ChatEvent;
+import net.md_5.bungee.api.event.LoginEvent;
+import net.md_5.bungee.api.event.PlayerDisconnectEvent;
+import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
-import java.lang.invoke.SwitchPoint;
-import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
@@ -177,11 +176,13 @@ public class BungeeListener implements Listener {
                             }
                         }
                         if(result[0] == 1) {
-                            //0人なら起動
-                            main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerStarted_Discord.toString(), ""+ConfigData.CloseTime, ConfigData.Server[f_i].Name));
-                            main.log(Bridge.Formatter(Messages.TimerStarted_Log.toString(), ""+ConfigData.CloseTime, ConfigData.Server[f_i].Name));
-                            ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.TimerStarted_Minecraft.toString(), ""+ConfigData.CloseTime, ConfigData.Server[f_i].Name)));
-                            ConfigData.Server[f_i].StartTimer();
+                            //0人だったらタイマー起動
+                            if(ConfigData.Server[f_i].StartTimer()){
+                                //タイマーが起動していなかったら
+                                main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerStarted_Discord.toString(), ""+ConfigData.CloseTime, ConfigData.Server[f_i].Name));
+                                main.log(Bridge.Formatter(Messages.TimerStarted_Log.toString(), ""+ConfigData.CloseTime, ConfigData.Server[f_i].Name));
+                                ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.TimerStarted_Minecraft.toString(), ""+ConfigData.CloseTime, ConfigData.Server[f_i].Name)));
+                            }
                         }
                     }
                 };

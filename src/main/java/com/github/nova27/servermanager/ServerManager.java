@@ -1,28 +1,26 @@
 package com.github.nova27.servermanager;
 
+import com.github.nova27.servermanager.config.ConfigData;
+import com.github.nova27.servermanager.config.ConfigGetter;
+import com.github.nova27.servermanager.listener.BungeeListener;
+import com.github.nova27.servermanager.listener.ChatCasterListener;
+import com.github.nova27.servermanager.listener.CommandExecuter;
+import com.github.nova27.servermanager.listener.DiscordListener;
+import com.github.nova27.servermanager.utils.Bridge;
+import com.github.nova27.servermanager.utils.Messages;
+import com.gmail.necnionch.myplugin.n8chatcaster.bungee.N8ChatCasterAPI;
+import com.gmail.necnionch.myplugin.n8chatcaster.bungee.N8ChatCasterPlugin;
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.JDABuilder;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.plugin.Plugin;
+
+import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Locale;
-
-import javax.security.auth.login.LoginException;
-
-import com.github.nova27.servermanager.config.ConfigGetter;
-import com.github.nova27.servermanager.listener.CommandExecuter;
-import com.github.nova27.servermanager.utils.Bridge;
-import com.github.nova27.servermanager.utils.Messages;
-import com.github.nova27.servermanager.config.ConfigData;
-import com.github.nova27.servermanager.listener.BungeeListener;
-import com.github.nova27.servermanager.listener.ChatCasterListener;
-import com.github.nova27.servermanager.listener.DiscordListener;
-import com.gmail.necnionch.myplugin.n8chatcaster.bungee.N8ChatCasterAPI;
-import com.gmail.necnionch.myplugin.n8chatcaster.bungee.N8ChatCasterPlugin;
-
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.JDABuilder;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.plugin.Plugin;
 
 public class ServerManager extends Plugin {
 	public Bridge bridge;

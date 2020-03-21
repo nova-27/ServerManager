@@ -1,5 +1,0 @@
-name: ServerManagerForBungeecord
-main: com.github.nova27.servermanager.ServerManager
-version: 1.0
-author: nova27
-softDepends: ["N8ChatCaster"]

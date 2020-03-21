@@ -173,8 +173,9 @@ public class Server implements StandardEventListener {
 
     /**
      * タイマーの起動
+     * @return true タイマーが起動していなかった
 	 */
-    public void StartTimer() {
+    public boolean StartTimer() {
         if (task == null) {
             task = new TimerTask() {
                 @Override
@@ -200,9 +201,13 @@ public class Server implements StandardEventListener {
                     }
                 }
             };
+            timer = new Timer();
+            timer.schedule(task, ConfigData.CloseTime * 60000);
+
+            return true;
+        }else{
+            return false;
         }
-        timer = new Timer();
-        timer.schedule(task, ConfigData.CloseTime * 60000);
     }
 
     /**
