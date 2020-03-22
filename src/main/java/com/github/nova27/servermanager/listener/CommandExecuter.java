@@ -22,7 +22,7 @@ public class CommandExecuter extends Command implements TabExecutor {
     private static final String Perm = "servermanager.command";
     private static final String Aliases = "smfb";
 
-    private static final String AdminPerm = "servermanager.command.start";
+    private static final String StartPerm = "servermanager.command.start";
 
     /**
      * コンストラクタ
@@ -61,8 +61,8 @@ public class CommandExecuter extends Command implements TabExecutor {
         }else if (args[0].equals("start")) {
             //サーバー起動コマンドだったら
 
-            if(commandSender.hasPermission(AdminPerm)) {
-                //コマンドを持っていない
+            if(!commandSender.hasPermission(StartPerm)) {
+                //コマンド実行権限を持っていない
                 commandSender.sendMessage(new TextComponent(ChatColor.RED + Messages.BungeeCommand_denied.toString()));
                 return;
             }
