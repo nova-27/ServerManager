@@ -16,12 +16,17 @@
       </snapshots>
       <id>jcenter</id>
       <name>jcenter-bintray</name>
-      <url>http://jcenter.bintray.com</url>
+      <url>https://jcenter.bintray.com</url>
     </repository>
 
     <repository>
       <id>jitpack.io</id>
       <url>https://jitpack.io</url>
+    </repository>
+
+    <repository>
+      <id>bungeecord-repo</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </repository>
   </repositories>
 
@@ -32,6 +37,29 @@
       <version>3.8.3_464</version>
       <type>jar</type>
       <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.gmail.necnionch</groupId>
+      <artifactId>n8charcaster</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/libs/N8ChatCaster.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>net.md-5</groupId>
+      <artifactId>bungeecord-api</artifactId>
+      <version>1.15-SNAPSHOT</version>
+      <type>jar</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.md-5</groupId>
+      <artifactId>bungeecord-api</artifactId>
+      <version>1.15-SNAPSHOT</version>
+      <type>javadoc</type>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 

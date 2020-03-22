@@ -4,7 +4,6 @@ import com.github.nova27.servermanager.ServerManager;
 import com.github.nova27.servermanager.config.ConfigData;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Message;
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 

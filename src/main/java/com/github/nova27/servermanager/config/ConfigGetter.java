@@ -2,7 +2,6 @@ package com.github.nova27.servermanager.config;
 
 import com.github.nova27.servermanager.ServerManager;
 import com.github.nova27.servermanager.listener.BungeeListener;
-import com.github.nova27.servermanager.listener.DiscordListener;
 import com.github.nova27.servermanager.utils.Bridge;
 import com.github.nova27.servermanager.utils.Messages;
 import net.md_5.bungee.config.Configuration;

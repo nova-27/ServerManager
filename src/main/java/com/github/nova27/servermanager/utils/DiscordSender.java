@@ -1,11 +1,7 @@
 package com.github.nova27.servermanager.utils;
 
 import com.github.nova27.servermanager.ServerManager;
-import com.sun.deploy.util.ArrayUtil;
-import org.yaml.snakeyaml.util.ArrayUtils;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

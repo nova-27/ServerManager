@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
 
 /**
  * 多言語対応メッセージ
@@ -90,7 +89,12 @@ public enum Messages {
     BungeeCommand_disabled,
     BungeeCommand_servernotfound,
     BungeeCommand_notfound,
-    BungeeCommand_syntaxerror;
+    BungeeCommand_syntaxerror,
+    BungeeCommand_help_1,
+    BungeeCommand_help_helpcmd,
+    BungeeCommand_help_listcmd,
+    BungeeCommand_help_startcmd,
+    BungeeCommand_denied;
 
     /**
      * propertiesファイルからメッセージを取ってくる
