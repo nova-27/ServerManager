@@ -2,9 +2,9 @@ package com.github.nova27.servermanager;
 
 import com.github.nova27.servermanager.config.ConfigData;
 import com.github.nova27.servermanager.config.ConfigGetter;
+import com.github.nova27.servermanager.listener.BungeeCommand;
 import com.github.nova27.servermanager.listener.BungeeListener;
 import com.github.nova27.servermanager.listener.ChatCasterListener;
-import com.github.nova27.servermanager.listener.CommandExecuter;
 import com.github.nova27.servermanager.listener.DiscordListener;
 import com.github.nova27.servermanager.utils.Bridge;
 import com.github.nova27.servermanager.utils.Messages;
@@ -70,7 +70,7 @@ public class ServerManager extends Plugin {
 		getProxy().getPluginManager().registerListener(this, new BungeeListener(this));
 
 		//コマンド登録
-		getProxy().getPluginManager().registerCommand(this, new CommandExecuter());
+		getProxy().getPluginManager().registerCommand(this, new BungeeCommand());
 
 		//プラグイン連携
 		Plugin temp = getProxy().getPluginManager().getPlugin("N8ChatCaster");
