@@ -44,7 +44,7 @@ public class CommandExecutor extends Command implements TabExecutor {
     @Override
     public void execute(CommandSender commandSender, String[] args) {
         //権限の確認
-        if(commandSender.hasPermission(permission)) {
+        if(!commandSender.hasPermission(permission)) {
             commandSender.sendMessage(new TextComponent(ChatColor.RED + Messages.BungeeCommand_denied.toString()));
             return;
         }
@@ -70,12 +70,17 @@ public class CommandExecutor extends Command implements TabExecutor {
         }
 
         //権限の確認
-        if (execCmd.subPermission != null && commandSender.hasPermission(execCmd.subPermission)) {
+        if (execCmd.subPermission != null && !commandSender.hasPermission(execCmd.subPermission)) {
             commandSender.sendMessage(new TextComponent(ChatColor.RED + Messages.BungeeCommand_denied.toString()));
             return;
         }
 
-        String[] commandArgs = Arrays.copyOfRange(args, 1, args.length-1);
+        String[] commandArgs = null;
+        if(args.length >= 2) {
+            Arrays.copyOfRange(args, 1, args.length - 1);
+        }else{
+            commandArgs = new String[1];
+        }
         //引数の確認
         if(commandArgs.length < execCmd.requireArgs) {
             commandSender.sendMessage(new TextComponent(ChatColor.RED + Messages.BungeeCommand_syntaxerror.toString()));
@@ -144,8 +149,9 @@ public class CommandExecutor extends Command implements TabExecutor {
          * デフォルトコマンドを設定する
          * @param isDefault デフォルトか
          */
-        public void setDefault(boolean isDefault) {
+        public SubCommandBuilder setDefault(boolean isDefault) {
             this.isDefault = isDefault;
+            return this;
         }
 
         /**

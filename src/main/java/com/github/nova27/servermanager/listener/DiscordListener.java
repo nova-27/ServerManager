@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 
 import static com.github.nova27.servermanager.listener.BungeeListener.Lobby;
 
-
+//TODO 整理
 public class DiscordListener extends ListenerAdapter {
     private ServerManager main;
 

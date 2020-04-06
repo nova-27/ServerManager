@@ -24,9 +24,9 @@ public class BungeeCommand extends CommandExecutor {
      */
     public BungeeCommand() {
         super(NAME, PERM, ALIASES);
-        addSubCommand(new CommandExecutor.SubCommandBuilder("help", this::helpCmd));
+        addSubCommand(new CommandExecutor.SubCommandBuilder("help", this::helpCmd).setDefault(true));
         addSubCommand(new CommandExecutor.SubCommandBuilder("list", this::listCmd));
-        addSubCommand(new CommandExecutor.SubCommandBuilder("start", STARTPERM, this::startCmd));
+        addSubCommand(new CommandExecutor.SubCommandBuilder("start", STARTPERM, this::startCmd).requireArgs(1));
     }
 
     /**
