@@ -1,6 +1,6 @@
 package com.github.nova27.servermanager.listener;
 
-import com.github.nova27.servermanager.command.CommandExecutor;
+import com.github.nova27.servermanager.command.MinecraftCommandExecutor;
 import com.github.nova27.servermanager.config.ConfigData;
 import com.github.nova27.servermanager.config.Server;
 import com.github.nova27.servermanager.utils.Bridge;
@@ -12,7 +12,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 /**
  * BungeeCordコマンド
  */
-public class BungeeCommand extends CommandExecutor {
+public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
     private static final String NAME = "ServerManagerForBungeeCord";
     private static final String PERM = "servermanager.command";
     private static final String ALIASES = "smfb";
@@ -22,11 +22,11 @@ public class BungeeCommand extends CommandExecutor {
     /**
      * コンストラクタ
      */
-    public BungeeCommand() {
+    public BungeeMinecraftCommand() {
         super(NAME, PERM, ALIASES);
-        addSubCommand(new CommandExecutor.SubCommandBuilder("help", this::helpCmd).setDefault(true));
-        addSubCommand(new CommandExecutor.SubCommandBuilder("list", this::listCmd));
-        addSubCommand(new CommandExecutor.SubCommandBuilder("start", STARTPERM, this::startCmd).requireArgs(1));
+        addSubCommand(new MinecraftSubCommandBuilder("help", this::helpCmd).setDefault(true));
+        addSubCommand(new MinecraftSubCommandBuilder("list", this::listCmd));
+        addSubCommand(new MinecraftSubCommandBuilder("start", STARTPERM, this::startCmd).requireArgs(1));
     }
 
     /**

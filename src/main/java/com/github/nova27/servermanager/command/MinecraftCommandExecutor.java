@@ -10,10 +10,10 @@ import net.md_5.bungee.api.plugin.TabExecutor;
 import java.util.*;
 
 /**
- * コマンドの呼び出し等を行うクラス
+ * Minecraftコマンドの呼び出し等を行うクラス
  */
-public class CommandExecutor extends Command implements TabExecutor {
-    private ArrayList<SubCommandBuilder> subCommands;
+public class MinecraftCommandExecutor extends Command implements TabExecutor {
+    private ArrayList<MinecraftSubCommandBuilder> subCommands;
     private String permission;
 
     /**
@@ -22,7 +22,7 @@ public class CommandExecutor extends Command implements TabExecutor {
      * @param permission 権限
      * @param aliases エイリアス
      */
-    public CommandExecutor(String name, String permission, String... aliases) {
+    public MinecraftCommandExecutor(String name, String permission, String... aliases) {
         super(name, permission, aliases);
         subCommands = new ArrayList<>();
         this.permission = permission;
@@ -32,7 +32,7 @@ public class CommandExecutor extends Command implements TabExecutor {
      * サブコマンドを追加する
      * @param builder サブコマンド
      */
-    public void addSubCommand(SubCommandBuilder builder) {
+    public void addSubCommand(MinecraftSubCommandBuilder builder) {
         subCommands.add(builder);
     }
 
@@ -50,15 +50,15 @@ public class CommandExecutor extends Command implements TabExecutor {
         }
         //引数の確認
         if(args.length == 0) {
-            for(SubCommandBuilder subCommand : subCommands) {
+            for(MinecraftSubCommandBuilder subCommand : subCommands) {
                 if(subCommand.isDefault) subCommand.action.execute(commandSender, new String[1]);
             }
             return;
         }
 
         //サブコマンドを選択
-        SubCommandBuilder execCmd = null;
-        for(SubCommandBuilder subCommand : subCommands) {
+        MinecraftSubCommandBuilder execCmd = null;
+        for(MinecraftSubCommandBuilder subCommand : subCommands) {
             if(subCommand.alias.equals(args[0])) {
                 execCmd = subCommand;
                 break;
@@ -77,7 +77,7 @@ public class CommandExecutor extends Command implements TabExecutor {
 
         String[] commandArgs = null;
         if(args.length >= 2) {
-            Arrays.copyOfRange(args, 1, args.length - 1);
+            commandArgs = Arrays.copyOfRange(args, 1, args.length - 1);
         }else{
             commandArgs = new String[1];
         }
@@ -106,7 +106,7 @@ public class CommandExecutor extends Command implements TabExecutor {
         Set<String> match = new HashSet();
         args[0] = args[0].toLowerCase();
         if(args.length == 1) {
-            for(SubCommandBuilder subCommand : subCommands) {
+            for(MinecraftSubCommandBuilder subCommand : subCommands) {
                 if(subCommand.alias.startsWith(args[0])) match.add(subCommand.alias);
             }
         }
@@ -117,10 +117,10 @@ public class CommandExecutor extends Command implements TabExecutor {
     /**
      * サブコマンドの設定等を保持するクラス
      */
-    public class SubCommandBuilder {
+    public class MinecraftSubCommandBuilder {
         private String alias;
         private String subPermission;
-        private CommandBase action;
+        private MinecraftCommandBase action;
         private boolean isDefault;
         private int requireArgs;
 
@@ -130,14 +130,14 @@ public class CommandExecutor extends Command implements TabExecutor {
          * @param subPermission 権限
          * @param action 実行する処理
          */
-        public SubCommandBuilder(String alias, String subPermission, CommandBase action) {
+        public MinecraftSubCommandBuilder(String alias, String subPermission, MinecraftCommandBase action) {
             this.alias = alias;
             this.subPermission = permission + "." + subPermission;
             this.action = action;
             isDefault = false;
             requireArgs = 0;
         }
-        public SubCommandBuilder(String alias, CommandBase action) {
+        public MinecraftSubCommandBuilder(String alias, MinecraftCommandBase action) {
             this.alias = alias;
             this.subPermission = null;
             this.action = action;
@@ -149,7 +149,7 @@ public class CommandExecutor extends Command implements TabExecutor {
          * デフォルトコマンドを設定する
          * @param isDefault デフォルトか
          */
-        public SubCommandBuilder setDefault(boolean isDefault) {
+        public MinecraftSubCommandBuilder setDefault(boolean isDefault) {
             this.isDefault = isDefault;
             return this;
         }
@@ -158,7 +158,7 @@ public class CommandExecutor extends Command implements TabExecutor {
          * 必要な引数の数を設定する
          * @param cnt 引数の数
          */
-        public SubCommandBuilder requireArgs(int cnt) {
+        public MinecraftSubCommandBuilder requireArgs(int cnt) {
             requireArgs = cnt;
             return this;
         }

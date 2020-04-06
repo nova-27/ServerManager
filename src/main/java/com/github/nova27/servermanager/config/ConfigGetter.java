@@ -87,9 +87,9 @@ public class ConfigGetter {
 
         //ロビーサーバー名を取得
         String lobby_name = getLobbyName(bungee_config);
-        for(int i = 0; i < ConfigData.Server.length; i++) {
-            if (lobby_name.equals(ConfigData.Server[i].ID)) {
-                BungeeListener.Lobby = ConfigData.Server[i];
+        for(Server server : ConfigData.Server) {
+            if (lobby_name.equals(server.ID)) {
+                BungeeListener.Lobby = server;
                 break;
             }
         }
