@@ -18,6 +18,7 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
     private static final String ALIASES = "smfb";
 
     private static final String STARTPERM = "start";
+    private static final String STOPPERM = "stop";
 
     /**
      * コンストラクタ
@@ -27,6 +28,7 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
         addSubCommand(new MinecraftSubCommandBuilder("help", this::helpCmd).setDefault(true));
         addSubCommand(new MinecraftSubCommandBuilder("list", this::listCmd));
         addSubCommand(new MinecraftSubCommandBuilder("start", STARTPERM, this::startCmd).requireArgs(1));
+        addSubCommand(new MinecraftSubCommandBuilder("stop", STOPPERM, this::stopCmd).requireArgs(1));
     }
 
     /**
@@ -80,6 +82,40 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
                             //無効だったら
                             sender.sendMessage(new TextComponent(ChatColor.RED + Bridge.Formatter(Messages.BungeeCommand_disabled.toString(), server.ID)));
                         }
+                    }
+                }
+
+                return;
+            }
+        }
+
+        sender.sendMessage(new TextComponent(ChatColor.RED + Bridge.Formatter(Messages.BungeeCommand_servernotfound.toString(), args[0])));
+    }
+
+    /**
+     * サーバーストップコマンド
+     */
+    public void stopCmd(CommandSender sender, String[] args) {
+        for (Server server : ConfigData.Server) {
+            if (server.ID.equals(args[0])) {
+                //引数とサーバーがマッチしたら
+
+                if (!server.Started) {
+                    if (server.Switching) {
+                        //停止中だったら
+                        sender.sendMessage(new TextComponent(ChatColor.YELLOW + Bridge.Formatter(Messages.BungeeCommand_stopping.toString(), server.ID)));
+                    } else {
+                        //停止済みだったら
+                        sender.sendMessage(new TextComponent(ChatColor.YELLOW + Bridge.Formatter(Messages.BungeeCommand_stopped.toString(), server.ID)));
+                    }
+                }else{
+                    if (server.Switching) {
+                        //起動中だったら
+                        sender.sendMessage(new TextComponent(ChatColor.RED + Bridge.Formatter(Messages.BungeeCommand_starting.toString(), server.ID)));
+                    } else {
+                        //起動済みだったら
+                        sender.sendMessage(new TextComponent(ChatColor.GREEN + Bridge.Formatter(Messages.ServerStopping_Log.toString(), server.ID)));
+                        server.Exec_command("stop", "", null);
                     }
                 }
 

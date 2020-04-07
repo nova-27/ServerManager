@@ -85,6 +85,7 @@ public enum Messages {
     BungeeCommand_starting,
     BungeeCommand_started,
     BungeeCommand_stopping,
+    BungeeCommand_stopped,
     BungeeCommand_start,
     BungeeCommand_disabled,
     BungeeCommand_servernotfound,
