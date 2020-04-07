@@ -136,9 +136,9 @@
     <dependency>
       <groupId>net.minecrell</groupId>
       <artifactId>serverlistplus</artifactId>
-      <version>1.0</version>
+      <version>3.4</version>
       <scope>system</scope>
-      <systemPath>${basedir}/libs/ServerListPlusUniversal-3.3.jar</systemPath>
+      <systemPath>${basedir}/libs/ServerListPlus-3.4.8-Universal.jar</systemPath>
     </dependency>
   </dependencies>
   <properties>

@@ -16,11 +16,10 @@ import net.dv8tion.jda.core.JDABuilder;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.minecrell.serverlistplus.bungee.BungeePlugin;
-import net.minecrell.serverlistplus.bungee.core.ServerListPlusCore;
-import net.minecrell.serverlistplus.bungee.core.player.PlayerIdentity;
-import net.minecrell.serverlistplus.bungee.core.replacement.LiteralPlaceholder;
-import net.minecrell.serverlistplus.bungee.core.replacement.ReplacementManager;
-import net.minecrell.serverlistplus.bungee.core.status.StatusResponse;
+import net.minecrell.serverlistplus.core.ServerListPlusCore;
+import net.minecrell.serverlistplus.core.replacement.LiteralPlaceholder;
+import net.minecrell.serverlistplus.core.replacement.ReplacementManager;
+import net.minecrell.serverlistplus.core.status.StatusResponse;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
@@ -151,15 +150,10 @@ public class ServerManager extends Plugin {
 				 */
 				@Override
 				public String replace(StatusResponse response, String s) {
-					PlayerIdentity identity = response.getRequest().getIdentity();
-					if (identity != null) {
-						if(BungeeListener.Lobby != null) {
-							return this.replace(s, BungeeListener.Lobby.Status());
-						}else{
-							return "--";
-						}
-					} else {
-						return super.replace(response, s);
+					if(BungeeListener.Lobby != null) {
+						return this.replace(s, BungeeListener.Lobby.Status());
+					}else{
+						return "--";
 					}
 				}
 
