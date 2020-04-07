@@ -40,7 +40,6 @@ public class ServerManager extends Plugin {
 
 	//連携用
 	private N8ChatCasterAPI chatCasterApi = null;
-	private BungeePlugin serverListPlus = null;
 
 	//config
 	private File plugin_config;
@@ -85,37 +84,6 @@ public class ServerManager extends Plugin {
 		if (temp instanceof N8ChatCasterPlugin) {
 			chatCasterApi = (((N8ChatCasterPlugin) temp).getChatCasterApi());
 			getProxy().getPluginManager().registerListener(this, new ChatCasterListener(this));
-		}
-
-		//プラグイン連携 ServerListPlus
-		Plugin temp2 = getProxy().getPluginManager().getPlugin("ServerListPlus");
-		if (temp2 instanceof BungeePlugin) {
-			ReplacementManager.getDynamic().add(new LiteralPlaceholder("%lobby_status%") {
-				/**
-				 * プレイヤーがpingを送信したとき
-				 */
-				@Override
-				public String replace(StatusResponse response, String s) {
-					PlayerIdentity identity = response.getRequest().getIdentity();
-					if (identity != null) {
-						if(BungeeListener.Lobby != null) {
-							return this.replace(s, BungeeListener.Lobby.Status());
-						}else{
-							return "--";
-						}
-					} else {
-						return super.replace(response, s);
-					}
-				}
-
-				/**
-				 * Unknown Player
-				 */
-				@Override
-				public String replace(ServerListPlusCore core, String s) {
-					return "";
-				}
-			});
 		}
 
 		super.onEnable();
@@ -172,6 +140,37 @@ public class ServerManager extends Plugin {
 			e.printStackTrace();
 			pl_enabled = false;
 			onDisable();
+		}
+
+		//プラグイン連携 ServerListPlus
+		Plugin temp2 = getProxy().getPluginManager().getPlugin("ServerListPlus");
+		if (temp2 instanceof BungeePlugin) {
+			ReplacementManager.getDynamic().add(new LiteralPlaceholder("%lobby_status%") {
+				/**
+				 * プレイヤーがpingを送信したとき
+				 */
+				@Override
+				public String replace(StatusResponse response, String s) {
+					PlayerIdentity identity = response.getRequest().getIdentity();
+					if (identity != null) {
+						if(BungeeListener.Lobby != null) {
+							return this.replace(s, BungeeListener.Lobby.Status());
+						}else{
+							return "--";
+						}
+					} else {
+						return super.replace(response, s);
+					}
+				}
+
+				/**
+				 * Unknown Player
+				 */
+				@Override
+				public String replace(ServerListPlusCore core, String s) {
+					return "";
+				}
+			});
 		}
 
 		super.onLoad();

@@ -133,6 +133,13 @@
       <scope>system</scope>
       <systemPath>${basedir}/libs/N8ChatCaster.jar</systemPath>
     </dependency>
+    <dependency>
+      <groupId>net.minecrell</groupId>
+      <artifactId>serverlistplus</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/libs/ServerListPlusUniversal-3.3.jar</systemPath>
+    </dependency>
   </dependencies>
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
