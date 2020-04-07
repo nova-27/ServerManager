@@ -7,7 +7,10 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Minecraftコマンドの呼び出し等を行うクラス
@@ -75,12 +78,11 @@ public class MinecraftCommandExecutor extends Command implements TabExecutor {
             return;
         }
 
-        String[] commandArgs = null;
-        if(args.length >= 2) {
-            commandArgs = Arrays.copyOfRange(args, 1, args.length - 1);
-        }else{
-            commandArgs = new String[1];
+        String[] commandArgs = new String[args.length - 1];
+        for(int i = 1; i <= commandArgs.length; i++) {
+            commandArgs[i-1] = args[i];
         }
+
         //引数の確認
         if(commandArgs.length < execCmd.requireArgs) {
             commandSender.sendMessage(new TextComponent(ChatColor.RED + Messages.BungeeCommand_syntaxerror.toString()));

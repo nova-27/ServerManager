@@ -9,6 +9,8 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 
+import static com.github.nova27.servermanager.listener.BungeeListener.Lobby;
+
 /**
  * BungeeCordコマンド
  */
@@ -39,6 +41,7 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
         sender.sendMessage(new TextComponent(ChatColor.WHITE + Messages.BungeeCommand_help_helpcmd.toString()));
         sender.sendMessage(new TextComponent(ChatColor.WHITE + Messages.BungeeCommand_help_listcmd.toString()));
         sender.sendMessage(new TextComponent(ChatColor.WHITE + Messages.BungeeCommand_help_startcmd.toString()));
+        sender.sendMessage(new TextComponent(ChatColor.WHITE + Messages.BungeeCommand_help_stopcmd.toString()));
     }
 
     /**
@@ -99,6 +102,12 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
         for (Server server : ConfigData.Server) {
             if (server.ID.equals(args[0])) {
                 //引数とサーバーがマッチしたら
+
+                if(Lobby.ID.equals(server.ID)) {
+                    //ロビーだったら
+                    sender.sendMessage(new TextComponent(ChatColor.RED + Messages.BungeeCommand_starting.toString()));
+                    return;
+                }
 
                 if (!server.Started) {
                     if (server.Switching) {

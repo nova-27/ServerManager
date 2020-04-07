@@ -6,7 +6,6 @@ import com.github.nova27.servermanager.config.ConfigData;
 import com.github.nova27.servermanager.config.Server;
 import com.github.nova27.servermanager.utils.Bridge;
 import com.github.nova27.servermanager.utils.Messages;
-import com.github.nova27.servermanager.utils.minecraft.StandardEventListener;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.ReadyEvent;
@@ -19,7 +18,7 @@ import java.util.regex.Pattern;
 import static com.github.nova27.servermanager.listener.BungeeListener.Lobby;
 
 public class DiscordListener extends ListenerAdapter {
-    private ServerManager main;
+    private static ServerManager main;
     private DiscordCommandExecutor commandExecutor;
 
     /**
@@ -37,6 +36,10 @@ public class DiscordListener extends ListenerAdapter {
                 .setOnlyFromAdmin(true)
         );
         commandExecutor.addSubCommand(new DiscordCommandExecutor.DiscordSubCommandBuilder("start", this::startCmd)
+                .requireArgs(1)
+                .setOnlyFromAdmin(true)
+        );
+        commandExecutor.addSubCommand(new DiscordCommandExecutor.DiscordSubCommandBuilder("stop", this::stopCmd)
                 .requireArgs(1)
                 .setOnlyFromAdmin(true)
         );
@@ -86,7 +89,10 @@ public class DiscordListener extends ListenerAdapter {
         String FirstString = ConfigData.FirstString;
         if (event.getMessage().getContentRaw().startsWith(FirstString)) {
             String command = event.getMessage().getContentRaw().replace(FirstString, "").split("\\s+")[0];
-            String[] args = event.getMessage().getContentRaw().replaceAll(Pattern.quote(FirstString + command) + "\\s+", "").split("\\s+");
+            String[] args = event.getMessage().getContentRaw().replaceAll(Pattern.quote(FirstString + command) + "\\s*", "").split("\\s+");
+            if(args[0].equals("")) {
+                args = new String[0];
+            }
 
             commandExecutor.executeCmd(event.getAuthor(), command, args);
         }else {
@@ -119,6 +125,10 @@ public class DiscordListener extends ListenerAdapter {
                 {
                         ConfigData.FirstString + "start [ServerID]",
                         Messages.HelpCommand_start.toString()
+                },
+                {
+                        ConfigData.FirstString + "stop [ServerID]",
+                        Messages.HelpCommand_stop.toString()
                 }
         });
     }
@@ -165,13 +175,10 @@ public class DiscordListener extends ListenerAdapter {
 
                     //プレイヤー数の取得
                     final String[] result = {""};
-                    ConfigData.Server[i].Exec_command("list", ConfigData.Server[i].getLogListCmd(), new StandardEventListener() {
-                        @Override
-                        public void exec(String result_tmp) {
-                            Matcher m = Pattern.compile("[0-9]+").matcher(result_tmp);
-                            if(m.find()) {
-                                result[0] = m.group();
-                            }
+                    ConfigData.Server[i].Exec_command("list", ConfigData.Server[i].getLogListCmd(), result_tmp -> {
+                        Matcher m = Pattern.compile("[0-9]+").matcher(result_tmp);
+                        if(m.find()) {
+                            result[0] = m.group();
                         }
                     });
                     while (result[0].equals("")) {
@@ -196,7 +203,7 @@ public class DiscordListener extends ListenerAdapter {
      * enabledコマンド
      */
     public void enabledCmd(User user, String[] args) {
-        boolean flag = Boolean.valueOf(args[1]);
+        boolean flag = Boolean.parseBoolean(args[1]);
 
         for(int i = 0; i <= ConfigData.Server.length - 1; i++) {
             if(args[0].equals(ConfigData.Server[i].ID)) {
@@ -296,6 +303,12 @@ public class DiscordListener extends ListenerAdapter {
         for (Server server : ConfigData.Server) {
             if (server.ID.equals(args[0])) {
                 //引数とサーバーがマッチしたら
+
+                if(Lobby.ID.equals(server.ID)) {
+                    //ロビーだったら
+                    main.bridge.sendToDiscord(":exclamation: " + Messages.BungeeCommand_starting.toString());
+                    return;
+                }
 
                 if (!server.Started) {
                     if (server.Switching) {

@@ -60,6 +60,7 @@ public enum Messages {
     HelpCommand_info,
     HelpCommand_enabled,
     HelpCommand_start,
+    HelpCommand_stop,
 
     InfoCommand_desc,
     InfoCommand_IP,
@@ -94,6 +95,8 @@ public enum Messages {
     BungeeCommand_help_helpcmd,
     BungeeCommand_help_listcmd,
     BungeeCommand_help_startcmd,
+    BungeeCommand_help_stopcmd,
+    BungeeCommand_lobby_error,
     BungeeCommand_denied,
 
     ServerStatus_disabled,
