@@ -94,7 +94,13 @@ public enum Messages {
     BungeeCommand_help_helpcmd,
     BungeeCommand_help_listcmd,
     BungeeCommand_help_startcmd,
-    BungeeCommand_denied;
+    BungeeCommand_denied,
+
+    ServerStatus_disabled,
+    ServerStatus_started,
+    ServerStatus_starting,
+    ServerStatus_stopped,
+    ServerStatus_stopping;
 
     /**
      * propertiesファイルからメッセージを取ってくる

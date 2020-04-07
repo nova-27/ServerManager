@@ -48,6 +48,14 @@
     </dependency>
 
     <dependency>
+      <groupId>net.minecrell</groupId>
+      <artifactId>serverlistplus</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/libs/ServerListPlusUniversal-3.3.jar</systemPath>
+    </dependency>
+
+    <dependency>
       <groupId>net.md-5</groupId>
       <artifactId>bungeecord-api</artifactId>
       <version>1.15-SNAPSHOT</version>

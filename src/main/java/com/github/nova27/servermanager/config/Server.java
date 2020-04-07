@@ -221,6 +221,28 @@ public class Server implements StandardEventListener {
     }
 
     /**
+     * サーバーのステータスを文字で返す
+     * @return ステータス
+     */
+    public String Status() {
+        if(!Enabled) return Messages.ServerStatus_disabled.toString();
+
+        if(Started) {
+            if(!Switching) {
+                return Messages.ServerStatus_started.toString();
+            }else{
+                return Messages.ServerStatus_starting.toString();
+            }
+        }else{
+            if(!Switching) {
+                return Messages.ServerStatus_stopped.toString();
+            }else{
+                return Messages.ServerStatus_stopping.toString();
+            }
+        }
+    }
+
+    /**
      * ログを取得したあとの処理
      * @param line ログ
      */

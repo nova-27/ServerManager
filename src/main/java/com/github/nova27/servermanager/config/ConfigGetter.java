@@ -49,11 +49,10 @@ public class ConfigGetter {
 
         //サーバー登録情報
         List<String> Server_List = plugin_configuration.getStringList("Server_List");
-        String[] Server_array = Server_List.toArray(new String[0]);
-        ConfigData.Server = new Server[Server_array.length];
+        ConfigData.Server = new Server[Server_List.size()];
 
-        for(int i =0;  i < Server_array.length; i++) {
-            String Id = Server_array[i];
+        for(int i =0;  i < Server_List.size(); i++) {
+            String Id = Server_List.get(i);
             String Name = plugin_configuration.getString("Server." + Id + ".Name");
             String Dir = plugin_configuration.getString("Server." + Id + ".Dir");
             String File = plugin_configuration.getString("Server." + Id + ".File");

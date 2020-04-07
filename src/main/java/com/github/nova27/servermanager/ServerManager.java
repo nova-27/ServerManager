@@ -2,6 +2,7 @@ package com.github.nova27.servermanager;
 
 import com.github.nova27.servermanager.config.ConfigData;
 import com.github.nova27.servermanager.config.ConfigGetter;
+import com.github.nova27.servermanager.config.Server;
 import com.github.nova27.servermanager.listener.BungeeListener;
 import com.github.nova27.servermanager.listener.BungeeMinecraftCommand;
 import com.github.nova27.servermanager.listener.ChatCasterListener;
@@ -14,6 +15,12 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.minecrell.serverlistplus.bungee.BungeePlugin;
+import net.minecrell.serverlistplus.bungee.core.ServerListPlusCore;
+import net.minecrell.serverlistplus.bungee.core.player.PlayerIdentity;
+import net.minecrell.serverlistplus.bungee.core.replacement.LiteralPlaceholder;
+import net.minecrell.serverlistplus.bungee.core.replacement.ReplacementManager;
+import net.minecrell.serverlistplus.bungee.core.status.StatusResponse;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
@@ -33,6 +40,7 @@ public class ServerManager extends Plugin {
 
 	//連携用
 	private N8ChatCasterAPI chatCasterApi = null;
+	private BungeePlugin serverListPlus = null;
 
 	//config
 	private File plugin_config;
@@ -72,11 +80,42 @@ public class ServerManager extends Plugin {
 		//コマンド登録
 		getProxy().getPluginManager().registerCommand(this, new BungeeMinecraftCommand());
 
-		//プラグイン連携
+		//プラグイン連携 N8ChatListener
 		Plugin temp = getProxy().getPluginManager().getPlugin("N8ChatCaster");
 		if (temp instanceof N8ChatCasterPlugin) {
 			chatCasterApi = (((N8ChatCasterPlugin) temp).getChatCasterApi());
 			getProxy().getPluginManager().registerListener(this, new ChatCasterListener(this));
+		}
+
+		//プラグイン連携 ServerListPlus
+		Plugin temp2 = getProxy().getPluginManager().getPlugin("ServerListPlus");
+		if (temp2 instanceof BungeePlugin) {
+			ReplacementManager.getDynamic().add(new LiteralPlaceholder("%lobby_status%") {
+				/**
+				 * プレイヤーがpingを送信したとき
+				 */
+				@Override
+				public String replace(StatusResponse response, String s) {
+					PlayerIdentity identity = response.getRequest().getIdentity();
+					if (identity != null) {
+						if(BungeeListener.Lobby != null) {
+							return this.replace(s, BungeeListener.Lobby.Status());
+						}else{
+							return "--";
+						}
+					} else {
+						return super.replace(response, s);
+					}
+				}
+
+				/**
+				 * Unknown Player
+				 */
+				@Override
+				public String replace(ServerListPlusCore core, String s) {
+					return "";
+				}
+			});
 		}
 
 		super.onEnable();
@@ -152,10 +191,10 @@ public class ServerManager extends Plugin {
 		//サーバーを停止
 		getLogger().info(Messages.AllServerStopping_Log.toString());
 		bridge.sendToDiscord(Messages.AllServerStopping_Discord.toString());
-		for(int i = 0; i < ConfigData.Server.length; i++) {
-			ConfigData.Server[i].StopTimer();
+		for(Server server : ConfigData.Server) {
+			server.StopTimer();
 
-			while(ConfigData.Server[i].Switching) {
+			while(server.Switching) {
 				//切り替えが終わるまで待機
 				try {
 					Thread.sleep(500);
@@ -164,10 +203,10 @@ public class ServerManager extends Plugin {
 				}
 			}
 
-			if(ConfigData.Server[i].Exec_command("stop", "", null)) {
+			if(server.Exec_command("stop", "", null)) {
 				//コマンドの実行に成功したら(起動していたら)
 				try {
-					ConfigData.Server[i].Process.waitFor();
+					server.Process.waitFor();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
