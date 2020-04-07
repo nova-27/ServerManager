@@ -68,9 +68,7 @@ public enum Messages {
     StatusCommand_bungee,
     StatusCommand_playercnt,
     StatusCommand_id,
-    StatusCommand_enabled,
-    StatusCommand_started,
-    StatusCommand_switching,
+    StatusCommand_serverStatus,
 
     EnabledCommand_permission,
     EnabledCommand_syntaxerror,

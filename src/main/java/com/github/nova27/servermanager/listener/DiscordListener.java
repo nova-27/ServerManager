@@ -150,9 +150,7 @@ public class DiscordListener extends ListenerAdapter {
                 Embed_text[i+1][0] = ConfigData.Server[i].Name;
                 Embed_text[i+1][1] =
                         Bridge.Formatter(Messages.StatusCommand_id + "\n", ConfigData.Server[i].ID) +
-                                Bridge.Formatter(Messages.StatusCommand_enabled.toString() + "\n", ""+ConfigData.Server[i].Enabled) +
-                                Bridge.Formatter(Messages.StatusCommand_started.toString() + "\n", ""+ConfigData.Server[i].Started) +
-                                Bridge.Formatter(Messages.StatusCommand_switching.toString(), ""+ConfigData.Server[i].Switching);
+                                Bridge.Formatter(ConfigData.Server[i].Status(), ConfigData.Server[i].Status());
 
                 if(ConfigData.Server[i].Enabled && ConfigData.Server[i].Started && !ConfigData.Server[i].Switching) {
                     //サーバーが起動していたら
