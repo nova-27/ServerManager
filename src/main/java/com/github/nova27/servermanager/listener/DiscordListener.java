@@ -36,6 +36,10 @@ public class DiscordListener extends ListenerAdapter {
                 .requireArgs(2)
                 .setOnlyFromAdmin(true)
         );
+        commandExecutor.addSubCommand(new DiscordCommandExecutor.DiscordSubCommandBuilder("start", this::startCmd)
+                .requireArgs(1)
+                .setOnlyFromAdmin(true)
+        );
     }
 
     /**
@@ -111,6 +115,10 @@ public class DiscordListener extends ListenerAdapter {
                 {
                         ConfigData.FirstString + "enabled [ServerID] [true or false]",
                         Messages.HelpCommand_enabled.toString()
+                },
+                {
+                        ConfigData.FirstString + "start [ServerID]",
+                        Messages.HelpCommand_start.toString()
                 }
         });
     }
@@ -150,7 +158,7 @@ public class DiscordListener extends ListenerAdapter {
                 Embed_text[i+1][0] = ConfigData.Server[i].Name;
                 Embed_text[i+1][1] =
                         Bridge.Formatter(Messages.StatusCommand_id + "\n", ConfigData.Server[i].ID) +
-                                Bridge.Formatter(ConfigData.Server[i].Status(), ConfigData.Server[i].Status());
+                                Bridge.Formatter(Messages.StatusCommand_serverStatus.toString(), ConfigData.Server[i].Status());
 
                 if(ConfigData.Server[i].Enabled && ConfigData.Server[i].Started && !ConfigData.Server[i].Switching) {
                     //サーバーが起動していたら
@@ -239,5 +247,45 @@ public class DiscordListener extends ListenerAdapter {
         }
 
         main.bridge.sendToDiscord(Messages.EnabledCommand_notfound.toString());
+    }
+
+    /**
+     * startコマンド
+     */
+    public void startCmd(User user, String[] args) {
+        for (Server server : ConfigData.Server) {
+            if (server.ID.equals(args[0])) {
+                //引数とサーバーがマッチしたら
+
+                if (server.Started) {
+                    if (server.Switching) {
+                        //起動中だったら
+                        main.bridge.sendToDiscord(Bridge.Formatter(":information_source: " + Messages.BungeeCommand_starting.toString(), server.ID));
+                    } else {
+                        //起動済みだったら
+                        main.bridge.sendToDiscord(Bridge.Formatter(":information_source: " + Messages.BungeeCommand_started.toString(), server.ID));
+                    }
+                } else {
+                    if (server.Switching) {
+                        //停止中だったら
+                        main.bridge.sendToDiscord(Bridge.Formatter(":exclamation: " + Messages.BungeeCommand_stopping.toString(), server.ID));
+                    } else {
+                        //停止済みだったら
+                        if (server.Enabled) {
+                            //有効だったら
+                            main.bridge.sendToDiscord(Bridge.Formatter(":exclamation: " + Messages.BungeeCommand_start.toString(), server.ID));
+                            server.Server_On();
+                        } else {
+                            //無効だったら
+                            main.bridge.sendToDiscord(Bridge.Formatter(":exclamation: " + Messages.BungeeCommand_disabled.toString(), server.ID));
+                        }
+                    }
+                }
+
+                return;
+            }
+        }
+
+        main.bridge.sendToDiscord(Bridge.Formatter(":exclamation: " + Messages.BungeeCommand_servernotfound.toString(), args[0]));
     }
 }

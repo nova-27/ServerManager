@@ -59,6 +59,7 @@ public enum Messages {
     HelpCommand_status,
     HelpCommand_info,
     HelpCommand_enabled,
+    HelpCommand_start,
 
     InfoCommand_desc,
     InfoCommand_IP,
