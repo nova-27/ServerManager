@@ -288,4 +288,38 @@ public class DiscordListener extends ListenerAdapter {
 
         main.bridge.sendToDiscord(Bridge.Formatter(":exclamation: " + Messages.BungeeCommand_servernotfound.toString(), args[0]));
     }
+
+    /**
+     * サーバーストップコマンド
+     */
+    public void stopCmd(User user, String[] args) {
+        for (Server server : ConfigData.Server) {
+            if (server.ID.equals(args[0])) {
+                //引数とサーバーがマッチしたら
+
+                if (!server.Started) {
+                    if (server.Switching) {
+                        //停止中だったら
+                        main.bridge.sendToDiscord(":information_source: " + Bridge.Formatter(Messages.BungeeCommand_stopping.toString(), server.ID));
+                    } else {
+                        //停止済みだったら
+                        main.bridge.sendToDiscord(":information_source: " + Bridge.Formatter(Messages.BungeeCommand_stopped.toString(), server.ID));
+                    }
+                }else{
+                    if (server.Switching) {
+                        //起動中だったら
+                        main.bridge.sendToDiscord(":exclamation: " + Bridge.Formatter(Messages.BungeeCommand_starting.toString(), server.ID));
+                    } else {
+                        //起動済みだったら
+                        main.bridge.sendToDiscord(":information_source: " + Bridge.Formatter(Messages.ServerStopping_Log.toString(), server.ID));
+                        server.Exec_command("stop", "", null);
+                    }
+                }
+
+                return;
+            }
+        }
+
+        main.bridge.sendToDiscord(":exclamation: " + Bridge.Formatter(Messages.BungeeCommand_servernotfound.toString(), args[0]));
+    }
 }
