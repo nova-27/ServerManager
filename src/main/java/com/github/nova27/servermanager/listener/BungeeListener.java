@@ -262,6 +262,12 @@ public class BungeeListener implements Listener {
             return;
         }
 
+        if(!e.getPlayer().hasPermission(BungeeMinecraftCommand.NAME + "." + BungeeMinecraftCommand.REQUEST_PERM)) {
+            //権限を持っていなかったら
+            e.getPlayer().sendMessage(new TextComponent(ChatColor.RED + Messages.BungeeCommand_denied.toString()));
+            return;
+        }
+
         if(!targetServer.Enabled) {
             //サーバーが無効だったら
             e.getPlayer().sendMessage(new TextComponent(ChatColor.RED + Bridge.Formatter(Messages.BungeeCommand_disabled.toString(), targetServer.ID)));

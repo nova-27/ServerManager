@@ -20,13 +20,13 @@ import static com.github.nova27.servermanager.listener.BungeeListener.Lobby;
  * BungeeCordコマンド
  */
 public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
-    private static final String NAME = "ServerManagerForBungeeCord";
+    public static final String NAME = "ServerManagerForBungeeCord";
     private static final String PERM = "servermanager.command";
     private static final String ALIASES = "smfb";
 
     private static final String START_PERM = "start";
     private static final String STOP_PERM = "stop";
-    private static final String REQUEST_PERM = "request";
+    public static final String REQUEST_PERM = "request";
 
     /**
      * コンストラクタ
