@@ -1,7 +1,6 @@
 package com.github.nova27.servermanager.command;
 
 import com.github.nova27.servermanager.utils.Messages;
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Command;
@@ -48,7 +47,7 @@ public class MinecraftCommandExecutor extends Command implements TabExecutor {
     public void execute(CommandSender commandSender, String[] args) {
         //権限の確認
         if(!commandSender.hasPermission(permission)) {
-            commandSender.sendMessage(new TextComponent(ChatColor.RED + Messages.BungeeCommand_denied.toString()));
+            commandSender.sendMessage(new TextComponent(Messages.BungeeCommand_denied.toString()));
             return;
         }
         //引数の確認
@@ -68,13 +67,13 @@ public class MinecraftCommandExecutor extends Command implements TabExecutor {
             }
         }
         if(execCmd == null) {
-            commandSender.sendMessage(new TextComponent(ChatColor.RED + Messages.BungeeCommand_notfound.toString()));
+            commandSender.sendMessage(new TextComponent(Messages.BungeeCommand_notfound.toString()));
             return;
         }
 
         //権限の確認
         if (execCmd.subPermission != null && !commandSender.hasPermission(execCmd.subPermission)) {
-            commandSender.sendMessage(new TextComponent(ChatColor.RED + Messages.BungeeCommand_denied.toString()));
+            commandSender.sendMessage(new TextComponent(Messages.BungeeCommand_denied.toString()));
             return;
         }
 
@@ -85,7 +84,7 @@ public class MinecraftCommandExecutor extends Command implements TabExecutor {
 
         //引数の確認
         if(commandArgs.length < execCmd.requireArgs) {
-            commandSender.sendMessage(new TextComponent(ChatColor.RED + Messages.BungeeCommand_syntaxerror.toString()));
+            commandSender.sendMessage(new TextComponent(Messages.BungeeCommand_syntaxerror.toString()));
             return;
         }
 

@@ -134,7 +134,7 @@ public class ServerManager extends Plugin {
 			jda.addEventListener(new DiscordListener(this));
 			bridge = new Bridge(this);
 		} catch (LoginException e) {
-			log(Messages.FailBotLogin.toString()); //todo
+			log(Messages.FailBotLogin.toString());
 			e.printStackTrace();
 			pl_enabled = false;
 			onDisable();

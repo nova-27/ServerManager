@@ -8,7 +8,6 @@ import com.github.nova27.servermanager.utils.Bridge;
 import com.github.nova27.servermanager.utils.Messages;
 import com.github.nova27.servermanager.utils.minecraft.StandardEventListener;
 import com.gmail.necnionch.myplugin.n8chatcaster.bungee.N8ChatCasterAPI;
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -269,13 +268,13 @@ public class BungeeListener implements Listener {
 
         if(!e.getPlayer().hasPermission(BungeeMinecraftCommand.PERM + "." + BungeeMinecraftCommand.REQUEST_PERM)) {
             //権限を持っていなかったら
-            e.getPlayer().sendMessage(new TextComponent(ChatColor.RED + Messages.BungeeCommand_denied.toString()));
+            e.getPlayer().sendMessage(new TextComponent(Messages.BungeeCommand_denied.toString()));
             return;
         }
 
         if(!targetServer.Enabled) {
             //サーバーが無効だったら
-            e.getPlayer().sendMessage(new TextComponent(ChatColor.RED + Bridge.Formatter(Messages.BungeeCommand_disabled.toString(), targetServer.ID)));
+            e.getPlayer().sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_disabled.toString(), targetServer.ID)));
             return;
         }
 
