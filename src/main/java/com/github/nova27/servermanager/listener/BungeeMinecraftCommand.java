@@ -196,9 +196,9 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
         RequestsManager.addRequest(sender.getName(), requestServer);
         sender.sendMessage(new TextComponent(Messages.BungeeCommand_request_successful.toString()));
 
-        Timestamp expiration_date = new Timestamp(requestServer.lastRequest + ConfigData.requestWait);
         if(!requestServer.Started) {
             //リクエストが承認されていないときだけアナウンス
+            Timestamp expiration_date = new Timestamp(requestServer.lastRequest + ConfigData.requestWait);
             SimpleDateFormat sdf = new SimpleDateFormat("MM.dd HH:mm:ss");
             String expiration_String = sdf.format(expiration_date);
             ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_new_request.toString(), requestServer.Name, requestServer.requests.size() + "", expiration_String)));

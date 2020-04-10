@@ -3,20 +3,21 @@ package com.github.nova27.servermanager.listener;
 import com.github.nova27.servermanager.ServerManager;
 import com.github.nova27.servermanager.config.ConfigData;
 import com.github.nova27.servermanager.config.Server;
+import com.github.nova27.servermanager.request.RequestsManager;
 import com.github.nova27.servermanager.utils.Bridge;
 import com.github.nova27.servermanager.utils.Messages;
 import com.github.nova27.servermanager.utils.minecraft.StandardEventListener;
 import com.gmail.necnionch.myplugin.n8chatcaster.bungee.N8ChatCasterAPI;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.ChatEvent;
-import net.md_5.bungee.api.event.LoginEvent;
-import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.ServerSwitchEvent;
+import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
@@ -125,8 +126,56 @@ public class BungeeListener implements Listener {
             main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerStarted_Discord.toString(), ""+ConfigData.CloseTime, Lobby.Name));
             main.log(Bridge.Formatter(Messages.TimerStarted_Log.toString(), ""+ConfigData.CloseTime, Lobby.Name));
         }
+
+        for(Server server : ConfigData.Server) {
+            if (server.Started && !server.Switching) {
+                Timer timer = new Timer(false);
+                TimerTask task = new TimerTask() {
+                    @Override
+                    public void run() {
+                        final int[] result = new int[]{0};
+                        server.Exec_command("list", server.getLogListCmd(), new StandardEventListener() {
+                            @Override
+                            public void exec(String result_tmp) {
+                                Matcher m = Pattern.compile("[0-9]+").matcher(result_tmp);
+
+                                if (m.find()) {
+                                    if (Integer.parseInt(m.group()) == 0) {
+                                        result[0] = 1;
+                                    } else {
+                                        result[0] = 2;
+                                    }
+                                }
+                            }
+                        });
+
+                        while (result[0] == 0) {
+                            //処理が終わるまで待機
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                        if (result[0] == 1) {
+                            //0人だったらタイマー起動
+                            if (server.StartTimer()) {
+                                //タイマーが起動していなかったら
+                                main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerStarted_Discord.toString(), "" + ConfigData.CloseTime, server.Name));
+                                main.log(Bridge.Formatter(Messages.TimerStarted_Log.toString(), "" + ConfigData.CloseTime, server.Name));
+                                ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.TimerStarted_Minecraft.toString(), "" + ConfigData.CloseTime, server.Name)));
+                            }
+                        }
+                    }
+                };
+                timer.schedule(task, 3000);
+            }
+        }
     }
 
+    /**
+     * サーバー間を移動できたら
+     */
     @EventHandler
     public void onSwitch(ServerSwitchEvent e) {
         for(int i = 0; i < ConfigData.Server.length; i++) {
@@ -188,6 +237,60 @@ public class BungeeListener implements Listener {
                 };
                 timer.schedule(task, 3000);
             }
+        }
+    }
+
+    /**
+     * サーバーに接続しようとしたら
+     */
+    @EventHandler
+    public void onConnect(ServerConnectEvent e) {
+        Server targetServer = null;
+        for(Server server : ConfigData.Server) {
+            if(server.ID.equals(e.getTarget().getName())) {
+                targetServer = server;
+                break;
+            }
+        }
+
+        //起動していたらreturn
+        if(targetServer.Started) return;
+
+        if(ConfigData.requestRequired == 0) {
+            //リクエスト機能が無効だったら
+            e.getPlayer().sendMessage(new TextComponent(Messages.BungeeCommand_request_disabled.toString()));
+            return;
+        }
+
+        if(!targetServer.Enabled) {
+            //サーバーが無効だったら
+            e.getPlayer().sendMessage(new TextComponent(ChatColor.RED + Bridge.Formatter(Messages.BungeeCommand_disabled.toString(), targetServer.ID)));
+            return;
+        }
+
+        RequestsManager.RequestsStats stats = RequestsManager.getRequestsStats(e.getPlayer().getName());
+
+        if(stats.getRequestServers().contains(targetServer)) {
+            //リクエスト済みだったら
+            e.getPlayer().sendMessage(new TextComponent(Messages.BungeeCommand_already_requested.toString()));
+            return;
+        }
+
+        if(stats.getLastRequestTime() + ConfigData.requestDelay > System.currentTimeMillis()) {
+            //再リクエスト待機時間が経過していなかったら
+            e.getPlayer().sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_request_wait.toString(), (ConfigData.requestDelay / 1000 / 60) + "")));
+            return;
+        }
+
+        RequestsManager.addRequest(e.getPlayer().getName(), targetServer);
+        e.getPlayer().sendMessage(new TextComponent(Messages.BungeeCommand_request_successful.toString()));
+
+        if(!targetServer.Started) {
+            //リクエストが承認されていないときだけアナウンス
+            Timestamp expiration_date = new Timestamp(targetServer.lastRequest + ConfigData.requestWait);
+            SimpleDateFormat sdf = new SimpleDateFormat("MM.dd HH:mm:ss");
+            String expiration_String = sdf.format(expiration_date);
+            ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_new_request.toString(), targetServer.Name, targetServer.requests.size() + "", expiration_String)));
         }
     }
 }
