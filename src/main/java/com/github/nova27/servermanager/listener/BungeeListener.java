@@ -245,6 +245,11 @@ public class BungeeListener implements Listener {
      */
     @EventHandler
     public void onConnect(ServerConnectEvent e) {
+        if (e.getReason().name().equals("JOIN_PROXY")) {
+            //プロキシに入りたてだったら
+            return;
+        }
+
         Server targetServer = null;
         for(Server server : ConfigData.Server) {
             if(server.ID.equals(e.getTarget().getName())) {
@@ -262,7 +267,7 @@ public class BungeeListener implements Listener {
             return;
         }
 
-        if(!e.getPlayer().hasPermission(BungeeMinecraftCommand.NAME + "." + BungeeMinecraftCommand.REQUEST_PERM)) {
+        if(!e.getPlayer().hasPermission(BungeeMinecraftCommand.PERM + "." + BungeeMinecraftCommand.REQUEST_PERM)) {
             //権限を持っていなかったら
             e.getPlayer().sendMessage(new TextComponent(ChatColor.RED + Messages.BungeeCommand_denied.toString()));
             return;

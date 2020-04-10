@@ -28,7 +28,7 @@ public class ConfigGetter {
         try {
             plugin_configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(plugin_config);
         } catch (IOException e) {
-            main.error_log(Messages.IOError.toString());
+            main.log(Messages.IOError.toString());
             e.printStackTrace();
             main.pl_enabled = false;
             main.onDisable();

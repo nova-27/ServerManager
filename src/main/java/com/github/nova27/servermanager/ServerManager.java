@@ -13,7 +13,6 @@ import com.gmail.necnionch.myplugin.n8chatcaster.bungee.N8ChatCasterAPI;
 import com.gmail.necnionch.myplugin.n8chatcaster.bungee.N8ChatCasterPlugin;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.minecrell.serverlistplus.bungee.BungeePlugin;
 import net.minecrell.serverlistplus.core.ServerListPlusCore;
@@ -67,7 +66,7 @@ public class ServerManager extends Plugin {
 		String OS_NAME = System.getProperty("os.name").toLowerCase();
 		if(!OS_NAME.startsWith("linux") && !OS_NAME.startsWith("windows")) {
 			//Windows・Linux以外の場合
-			error_log(Messages.UnsupportedOS.toString());
+			log(Messages.UnsupportedOS.toString());
 			pl_enabled = false;
 			onDisable();
 		}
@@ -114,12 +113,12 @@ public class ServerManager extends Plugin {
 			bungee_config = new File(
 					"config.yml");
 			if (!bungee_config.exists()) {
-				error_log(Messages.BungeeConfigNotFound.toString());
+				log(Messages.BungeeConfigNotFound.toString());
 				pl_enabled = false;
 				onDisable();
 			}
 		} catch (IOException e) {
-			error_log(Messages.IOError.toString());
+			log(Messages.IOError.toString());
 			e.printStackTrace();
 			pl_enabled = false;
 			onDisable();
@@ -135,7 +134,7 @@ public class ServerManager extends Plugin {
 			jda.addEventListener(new DiscordListener(this));
 			bridge = new Bridge(this);
 		} catch (LoginException e) {
-			error_log(Messages.FailBotLogin.toString());
+			log(Messages.FailBotLogin.toString()); //todo
 			e.printStackTrace();
 			pl_enabled = false;
 			onDisable();
@@ -220,14 +219,6 @@ public class ServerManager extends Plugin {
 	 */
 	public void log(String log) {
 		getLogger().info(log);
-	}
-
-	/**
-	 * エラーログを出力する
-	 * @param log 出力する文字
-	 */
-	public void error_log(String log) {
-		getLogger().info(ChatColor.RED+log);
 	}
 
 	/**
