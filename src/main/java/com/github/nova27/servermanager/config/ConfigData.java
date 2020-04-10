@@ -19,4 +19,9 @@ public class ConfigData {
     public static String IP = "";
     public static String Port = "";
     public static Server[] Server;
+
+    //リクエスト設定
+    public static int requestRequired = 0;
+    public static int requestWait = 0;
+    public static long requestDelay = 0;
 }

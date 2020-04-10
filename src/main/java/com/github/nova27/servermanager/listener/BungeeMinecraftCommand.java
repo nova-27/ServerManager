@@ -3,11 +3,16 @@ package com.github.nova27.servermanager.listener;
 import com.github.nova27.servermanager.command.MinecraftCommandExecutor;
 import com.github.nova27.servermanager.config.ConfigData;
 import com.github.nova27.servermanager.config.Server;
+import com.github.nova27.servermanager.request.RequestsManager;
 import com.github.nova27.servermanager.utils.Bridge;
 import com.github.nova27.servermanager.utils.Messages;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 import static com.github.nova27.servermanager.listener.BungeeListener.Lobby;
 
@@ -19,8 +24,9 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
     private static final String PERM = "servermanager.command";
     private static final String ALIASES = "smfb";
 
-    private static final String STARTPERM = "start";
-    private static final String STOPPERM = "stop";
+    private static final String START_PERM = "start";
+    private static final String STOP_PERM = "stop";
+    private static final String REQUEST_PERM = "request";
 
     /**
      * コンストラクタ
@@ -29,8 +35,9 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
         super(NAME, PERM, ALIASES);
         addSubCommand(new MinecraftSubCommandBuilder("help", this::helpCmd).setDefault(true));
         addSubCommand(new MinecraftSubCommandBuilder("list", this::listCmd));
-        addSubCommand(new MinecraftSubCommandBuilder("start", STARTPERM, this::startCmd).requireArgs(1));
-        addSubCommand(new MinecraftSubCommandBuilder("stop", STOPPERM, this::stopCmd).requireArgs(1));
+        addSubCommand(new MinecraftSubCommandBuilder("start", START_PERM, this::startCmd).requireArgs(1));
+        addSubCommand(new MinecraftSubCommandBuilder("stop", STOP_PERM, this::stopCmd).requireArgs(1));
+        addSubCommand(new MinecraftSubCommandBuilder("request", REQUEST_PERM, this::requestCmd).requireArgs(1));
     }
 
     /**
@@ -42,6 +49,7 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
         sender.sendMessage(new TextComponent(ChatColor.WHITE + Messages.BungeeCommand_help_listcmd.toString()));
         sender.sendMessage(new TextComponent(ChatColor.WHITE + Messages.BungeeCommand_help_startcmd.toString()));
         sender.sendMessage(new TextComponent(ChatColor.WHITE + Messages.BungeeCommand_help_stopcmd.toString()));
+        sender.sendMessage(new TextComponent(Messages.BungeeCommand_help_requestcmd.toString()));
     }
 
     /**
@@ -105,7 +113,7 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
 
                 if(Lobby.ID.equals(server.ID)) {
                     //ロビーだったら
-                    sender.sendMessage(new TextComponent(ChatColor.RED + Messages.BungeeCommand_starting.toString()));
+                    sender.sendMessage(new TextComponent(ChatColor.RED + Messages.BungeeCommand_lobby_error.toString()));
                     return;
                 }
 
@@ -133,5 +141,67 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
         }
 
         sender.sendMessage(new TextComponent(ChatColor.RED + Bridge.Formatter(Messages.BungeeCommand_servernotfound.toString(), args[0])));
+    }
+
+    /**
+     * リクエストコマンド
+     */
+    public void requestCmd(CommandSender sender, String[] args) {
+        if(ConfigData.requestRequired == 0) {
+            //リクエスト機能が無効だったら
+            sender.sendMessage(new TextComponent(Messages.BungeeCommand_request_disabled.toString()));
+            return;
+        }
+
+        Server requestServer = null;
+        for(Server server : ConfigData.Server) {
+            if(server.ID.equals(args[0])) {
+                requestServer = server;
+                break;
+            }
+        }
+
+        if(requestServer == null) {
+            //サーバーが見つからなかったら
+            sender.sendMessage(new TextComponent(ChatColor.RED + Bridge.Formatter(Messages.BungeeCommand_servernotfound.toString(), args[0])));
+            return;
+        }
+
+        if(!requestServer.Enabled) {
+            //サーバーが無効だったら
+            sender.sendMessage(new TextComponent(ChatColor.RED + Bridge.Formatter(Messages.BungeeCommand_disabled.toString(), requestServer.ID)));
+            return;
+        }
+
+        if(requestServer.Started) {
+            //起動していたら
+            sender.sendMessage(new TextComponent(ChatColor.YELLOW + Bridge.Formatter(Messages.BungeeCommand_started.toString(), requestServer.ID)));
+            return;
+        }
+
+        RequestsManager.RequestsStats stats = RequestsManager.getRequestsStats(sender.getName());
+
+        if(stats.getRequestServers().contains(requestServer)) {
+            //リクエスト済みだったら
+            sender.sendMessage(new TextComponent(Messages.BungeeCommand_already_requested.toString()));
+            return;
+        }
+
+        if(stats.getLastRequestTime() + ConfigData.requestDelay > System.currentTimeMillis()) {
+            //再リクエスト待機時間が経過していなかったら
+            sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_request_wait.toString(), (ConfigData.requestDelay / 1000 / 60) + "")));
+            return;
+        }
+
+        RequestsManager.addRequest(sender.getName(), requestServer);
+        sender.sendMessage(new TextComponent(Messages.BungeeCommand_request_successful.toString()));
+
+        Timestamp expiration_date = new Timestamp(requestServer.lastRequest + ConfigData.requestWait);
+        if(!requestServer.Started) {
+            //リクエストが承認されていないときだけアナウンス
+            SimpleDateFormat sdf = new SimpleDateFormat("MM.dd HH:mm:ss");
+            String expiration_String = sdf.format(expiration_date);
+            ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_new_request.toString(), requestServer.Name, requestServer.requests.size() + "", expiration_String)));
+        }
     }
 }

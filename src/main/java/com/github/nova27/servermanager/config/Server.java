@@ -1,6 +1,7 @@
 package com.github.nova27.servermanager.config;
 
 import com.github.nova27.servermanager.ServerManager;
+import com.github.nova27.servermanager.request.Request;
 import com.github.nova27.servermanager.utils.Bridge;
 import com.github.nova27.servermanager.utils.DiscordSender;
 import com.github.nova27.servermanager.utils.Messages;
@@ -13,6 +14,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -54,6 +56,10 @@ public class Server implements StandardEventListener {
     private String LogDeleteRegex;
     private String LogListCmd;
 
+    //最終リクエスト時刻
+    public long lastRequest;
+    public ArrayList<Request> requests;
+
     /**
      * コンストラクタ
      * @param main メインのオブジェクト
@@ -84,6 +90,8 @@ public class Server implements StandardEventListener {
         this.ServerStopped = ServerStopped;
         this.LogDeleteRegex = LogDeleteRegex;
         this.LogListCmd = LogListCmd;
+        this.lastRequest = 0L;
+        this.requests = new ArrayList<>();
     }
 
     /**
@@ -116,6 +124,10 @@ public class Server implements StandardEventListener {
                 //ログ取得スレッドの開始
                 Log_getter = new GetLogsThread(this, this, LogDeleteRegex);
                 Log_getter.start();
+
+                //リクエストを初期化
+                requests = new ArrayList<>();
+                lastRequest = 0L;
 
                 main.log(Bridge.Formatter(Messages.ServerStarting_Log.toString(), Name));
                 main.bridge.sendToDiscord(Bridge.Formatter(Messages.ServerStarting_Discord.toString(), Name));

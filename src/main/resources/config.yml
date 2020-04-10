@@ -26,6 +26,16 @@ ToMinecraft: §1[Discord] §f<{0}> {1}
 # Power saving automatic server stop function
 CloseTime: [全プレイヤー退出の何分後に閉じるか(How many minutes after all players leave to close)]
 
+# ------------Added from v5.0-----------
+# 起動に必要なリクエスト数
+# 0 = 完全に無効, 1 = 一回のリクエストで（すぐに）起動
+NumberOf_RequestsRequired: 3
+# リクエスト持続時間（分）[最後のリクエストから]
+RequestWaitTime: 10
+# 再リクエストできる時間
+RequestDelay: 3
+#---------------------------------------
+
 # 各サーバーの設定 (Server Settings)
 # [形式(Format)]
 # ServerList:

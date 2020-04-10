@@ -92,6 +92,13 @@ public class ConfigGetter {
                 break;
             }
         }
+
+        //リクエスト設定を取得
+        ConfigData.requestRequired = plugin_configuration.getInt("NumberOf_RequestsRequired");
+        int requestWaitMinutes = plugin_configuration.getInt("RequestWaitTime");
+        ConfigData.requestWait = requestWaitMinutes * 60 * 1000;
+        int requestDelayMinutes = plugin_configuration.getInt("RequestDelay");
+        ConfigData.requestDelay = requestDelayMinutes * 60 * 1000;
     }
 
     /**

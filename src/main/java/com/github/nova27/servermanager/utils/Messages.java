@@ -103,7 +103,16 @@ public enum Messages {
     ServerStatus_started,
     ServerStatus_starting,
     ServerStatus_stopped,
-    ServerStatus_stopping;
+    ServerStatus_stopping,
+
+    BungeeCommand_help_requestcmd,
+    BungeeCommand_request_disabled,
+    BungeeCommand_already_requested,
+    BungeeCommand_request_wait,
+    BungeeCommand_request_successful,
+    BungeeCommand_new_request,
+    BungeeCommand_request_expired,
+    BungeeCommand_request_approval;
 
     /**
      * propertiesファイルからメッセージを取ってくる

@@ -306,7 +306,7 @@ public class DiscordListener extends ListenerAdapter {
 
                 if(Lobby.ID.equals(server.ID)) {
                     //ロビーだったら
-                    main.bridge.sendToDiscord(":exclamation: " + Messages.BungeeCommand_starting.toString());
+                    main.bridge.sendToDiscord(":exclamation: " + Messages.BungeeCommand_lobby_error.toString());
                     return;
                 }
 
