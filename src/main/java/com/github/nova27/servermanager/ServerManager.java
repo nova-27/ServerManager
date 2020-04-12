@@ -56,8 +56,8 @@ public class ServerManager extends Plugin {
 	public void onEnable() {
 		//言語設定
 		defaultLocale = Locale.getDefault();
-		if(defaultLocale != Locale.JAPAN && defaultLocale != Locale.US) {
-			//言語が日本語でも英語でもなかったら
+		if(defaultLocale != Locale.JAPAN && defaultLocale != Locale.US && defaultLocale != Locale.FRANCE) {
+			//言語が日本語でも英語でもフランス語でもなかったら
 			Locale.setDefault(Locale.ENGLISH);
 			log(Messages.ChangedLang.toString());
 		}
