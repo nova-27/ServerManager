@@ -86,9 +86,6 @@ public class BungeeListener implements Listener {
         main.bridge.PlayerCount(1);
         String name = e.getConnection().getName();
         main.bridge.sendToDiscord(Bridge.Formatter(Messages.JoinedTheGame.toString(), name));
-        Lobby.StopTimer();
-        main.log(Bridge.Formatter(Messages.TimerStopped_Log.toString(), Lobby.Name));
-        main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerStopped_Discord.toString(), Lobby.Name));
         ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.TimerStopped_Minecraft.toString(), Lobby.Name)));
 
         //一人目の場合
@@ -105,6 +102,11 @@ public class BungeeListener implements Listener {
                 //処理中だったら、キック
                 e.getConnection().disconnect(new TextComponent(Messages.BungeeSwitching.toString()));
                 main.bridge.PlayerCount(-1);
+            }else{
+                //起動済みだったらタイマーストップ
+                Lobby.StopTimer();
+                main.log(Bridge.Formatter(Messages.TimerStopped_Log.toString(), Lobby.Name));
+                main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerStopped_Discord.toString(), Lobby.Name));
             }
         }
     }
@@ -127,7 +129,7 @@ public class BungeeListener implements Listener {
         }
 
         for(Server server : ConfigData.Server) {
-            if (server.Started && !server.Switching) {
+            if (server != Lobby && server.Started && !server.Switching) {
                 Timer timer = new Timer(false);
                 TimerTask task = new TimerTask() {
                     @Override
@@ -255,6 +257,11 @@ public class BungeeListener implements Listener {
                 targetServer = server;
                 break;
             }
+        }
+
+        if(targetServer == null) {
+            //プラグインに登録されていないサーバーだったら
+            return;
         }
 
         //起動していたらreturn
