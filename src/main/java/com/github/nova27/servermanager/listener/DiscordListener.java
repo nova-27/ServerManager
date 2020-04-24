@@ -6,11 +6,15 @@ import com.github.nova27.servermanager.config.ConfigData;
 import com.github.nova27.servermanager.config.Server;
 import com.github.nova27.servermanager.utils.Bridge;
 import com.github.nova27.servermanager.utils.Messages;
+import com.gmail.necnionch.myapp.markdownconverter.MarkComponent;
+import com.gmail.necnionch.myapp.markdownconverter.MarkdownConverter;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.TextComponent;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,6 +24,16 @@ import static com.github.nova27.servermanager.listener.BungeeListener.Lobby;
 public class DiscordListener extends ListenerAdapter {
     private static ServerManager main;
     private DiscordCommandExecutor commandExecutor;
+
+    private static String sendToMinecraft_format;
+
+    /**
+     * マイクラ宛てメッセージの形式を設定
+     * @param format 形式
+     */
+    public static void setSendToMinecraft_format(String format) {
+        sendToMinecraft_format = format;
+    }
 
     /**
      * コンストラクタ
@@ -97,7 +111,14 @@ public class DiscordListener extends ListenerAdapter {
             commandExecutor.executeCmd(event.getAuthor(), command, args);
         }else {
             // コマンドでなければMinecraftへ送信
-            main.bridge.sendToMinecraft(event.getMessage());
+            MarkComponent[] components = MarkdownConverter.fromDiscordMessage(event.getMessage().getContentRaw());
+            TextComponent[] message = MarkdownConverter.toMinecraftMessage(components);
+
+            TextComponent[] send = new TextComponent[message.length + 1];
+            send[0] = new TextComponent(Bridge.Formatter(sendToMinecraft_format, event.getMessage().getAuthor().getName()));
+            System.arraycopy(message, 0, send, 1, message.length);
+
+            ProxyServer.getInstance().broadcast(send);
         }
     }
 
@@ -165,9 +186,13 @@ public class DiscordListener extends ListenerAdapter {
         Thread thread = new Thread(() -> {
             //各サーバーの情報
             for(int i = 0; i < ConfigData.Server.length; i++) {
+                String ID = ConfigData.Server[i].ID;
+                if(!ConfigData.Server[i].AnotherID.equals("")) {
+                    ID += "(" + ConfigData.Server[i].AnotherID + ")";
+                }
                 Embed_text[i+1][0] = ConfigData.Server[i].Name;
                 Embed_text[i+1][1] =
-                        Bridge.Formatter(Messages.StatusCommand_id + "\n", ConfigData.Server[i].ID) +
+                        Bridge.Formatter(Messages.StatusCommand_id + "\n", ID) +
                                 Bridge.Formatter(Messages.StatusCommand_serverStatus.toString(), ConfigData.Server[i].Status());
 
                 if(ConfigData.Server[i].Enabled && ConfigData.Server[i].Started && !ConfigData.Server[i].Switching) {
@@ -206,7 +231,7 @@ public class DiscordListener extends ListenerAdapter {
         boolean flag = Boolean.parseBoolean(args[1]);
 
         for(int i = 0; i <= ConfigData.Server.length - 1; i++) {
-            if(args[0].equals(ConfigData.Server[i].ID)) {
+            if(args[0].equals(ConfigData.Server[i].ID) || args[0].equals(ConfigData.Server[i].AnotherID)) {
                 if(ConfigData.Server[i] == Lobby) {
                     main.bridge.sendToDiscord(Messages.EnabledCommand_tried_lobbyenabled_change.toString());
                     return;
@@ -261,30 +286,34 @@ public class DiscordListener extends ListenerAdapter {
      */
     public void startCmd(User user, String[] args) {
         for (Server server : ConfigData.Server) {
-            if (server.ID.equals(args[0])) {
+            if (server.ID.equals(args[0]) || server.AnotherID.equals(args[0])) {
                 //引数とサーバーがマッチしたら
 
+                String ID = server.ID;
+                if(!server.AnotherID.equals("")) {
+                    ID += "(" + server.AnotherID + ")";
+                }
                 if (server.Started) {
                     if (server.Switching) {
                         //起動中だったら
-                        main.bridge.sendToDiscord(Bridge.Formatter(":information_source: " + Messages.BungeeCommand_starting.toString(), server.ID));
+                        main.bridge.sendToDiscord(Bridge.Formatter(":information_source: " + Messages.BungeeCommand_starting.toString(), ID));
                     } else {
                         //起動済みだったら
-                        main.bridge.sendToDiscord(Bridge.Formatter(":information_source: " + Messages.BungeeCommand_started.toString(), server.ID));
+                        main.bridge.sendToDiscord(Bridge.Formatter(":information_source: " + Messages.BungeeCommand_started.toString(), ID));
                     }
                 } else {
                     if (server.Switching) {
                         //停止中だったら
-                        main.bridge.sendToDiscord(Bridge.Formatter(":exclamation: " + Messages.BungeeCommand_stopping.toString(), server.ID));
+                        main.bridge.sendToDiscord(Bridge.Formatter(":exclamation: " + Messages.BungeeCommand_stopping.toString(), ID));
                     } else {
                         //停止済みだったら
                         if (server.Enabled) {
                             //有効だったら
-                            main.bridge.sendToDiscord(Bridge.Formatter(":exclamation: " + Messages.BungeeCommand_start.toString(), server.ID));
+                            main.bridge.sendToDiscord(Bridge.Formatter(":exclamation: " + Messages.BungeeCommand_start.toString(), ID));
                             server.Server_On();
                         } else {
                             //無効だったら
-                            main.bridge.sendToDiscord(Bridge.Formatter(":exclamation: " + Messages.BungeeCommand_disabled.toString(), server.ID));
+                            main.bridge.sendToDiscord(Bridge.Formatter(":exclamation: " + Messages.BungeeCommand_disabled.toString(), ID));
                         }
                     }
                 }
@@ -301,7 +330,7 @@ public class DiscordListener extends ListenerAdapter {
      */
     public void stopCmd(User user, String[] args) {
         for (Server server : ConfigData.Server) {
-            if (server.ID.equals(args[0])) {
+            if (server.ID.equals(args[0]) || server.AnotherID.equals(args[0])) {
                 //引数とサーバーがマッチしたら
 
                 if(Lobby.ID.equals(server.ID)) {
@@ -310,21 +339,25 @@ public class DiscordListener extends ListenerAdapter {
                     return;
                 }
 
+                String ID = server.ID;
+                if(!server.AnotherID.equals("")) {
+                    ID += "(" + server.AnotherID + ")";
+                }
                 if (!server.Started) {
                     if (server.Switching) {
                         //停止中だったら
-                        main.bridge.sendToDiscord(":information_source: " + Bridge.Formatter(Messages.BungeeCommand_stopping.toString(), server.ID));
+                        main.bridge.sendToDiscord(":information_source: " + Bridge.Formatter(Messages.BungeeCommand_stopping.toString(), ID));
                     } else {
                         //停止済みだったら
-                        main.bridge.sendToDiscord(":information_source: " + Bridge.Formatter(Messages.BungeeCommand_stopped.toString(), server.ID));
+                        main.bridge.sendToDiscord(":information_source: " + Bridge.Formatter(Messages.BungeeCommand_stopped.toString(), ID));
                     }
                 }else{
                     if (server.Switching) {
                         //起動中だったら
-                        main.bridge.sendToDiscord(":exclamation: " + Bridge.Formatter(Messages.BungeeCommand_starting.toString(), server.ID));
+                        main.bridge.sendToDiscord(":exclamation: " + Bridge.Formatter(Messages.BungeeCommand_starting.toString(), ID));
                     } else {
                         //起動済みだったら
-                        main.bridge.sendToDiscord(":information_source: " + Bridge.Formatter(Messages.ServerStopping_Log.toString(), server.ID));
+                        main.bridge.sendToDiscord(":information_source: " + Bridge.Formatter(Messages.ServerStopping_Log.toString(), ID));
                         server.Exec_command("stop", "", null);
                     }
                 }

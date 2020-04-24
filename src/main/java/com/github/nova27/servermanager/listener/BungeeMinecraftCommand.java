@@ -58,7 +58,11 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
     public void listCmd(CommandSender sender, String[] args) {
         String list = "";
         for (Server server : ConfigData.Server) {
-            list += server.Name + "(" + server.ID + "), ";
+            list += server.Name + "(" + server.ID;
+            if(!server.AnotherID.equals("")) {
+                list += " & " + server.AnotherID;
+            }
+            list += "), ";
         }
         sender.sendMessage(new TextComponent(ChatColor.GREEN + list));
     }
@@ -68,30 +72,34 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
      */
     public void startCmd(CommandSender sender, String[] args) {
         for (Server server : ConfigData.Server) {
-            if (server.ID.equals(args[0])) {
+            if (server.ID.equals(args[0]) || server.AnotherID.equals(args[0])) {
                 //引数とサーバーがマッチしたら
 
+                String ID = server.ID;
+                if(!server.AnotherID.equals("")) {
+                    ID += "(" + server.AnotherID + ")";
+                }
                 if (server.Started) {
                     if (server.Switching) {
                         //起動中だったら
-                        sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_starting.toString(), server.ID)));
+                        sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_starting.toString(), ID)));
                     } else {
                         //起動済みだったら
-                        sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_started.toString(), server.ID)));
+                        sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_started.toString(), ID)));
                     }
                 } else {
                     if (server.Switching) {
                         //停止中だったら
-                        sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_stopping.toString(), server.ID)));
+                        sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_stopping.toString(), ID)));
                     } else {
                         //停止済みだったら
                         if (server.Enabled) {
                             //有効だったら
-                            sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_start.toString(), server.ID)));
+                            sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_start.toString(), ID)));
                             server.Server_On();
                         } else {
                             //無効だったら
-                            sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_disabled.toString(), server.ID)));
+                            sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_disabled.toString(), ID)));
                         }
                     }
                 }
@@ -108,7 +116,7 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
      */
     public void stopCmd(CommandSender sender, String[] args) {
         for (Server server : ConfigData.Server) {
-            if (server.ID.equals(args[0])) {
+            if (server.ID.equals(args[0]) || server.AnotherID.equals(args[0])) {
                 //引数とサーバーがマッチしたら
 
                 if(Lobby.ID.equals(server.ID)) {
@@ -117,21 +125,25 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
                     return;
                 }
 
+                String ID = server.ID;
+                if(!server.AnotherID.equals("")) {
+                    ID += "(" + server.AnotherID + ")";
+                }
                 if (!server.Started) {
                     if (server.Switching) {
                         //停止中だったら
-                        sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_stopping.toString(), server.ID)));
+                        sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_stopping.toString(), ID)));
                     } else {
                         //停止済みだったら
-                        sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_stopped.toString(), server.ID)));
+                        sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_stopped.toString(), ID)));
                     }
                 }else{
                     if (server.Switching) {
                         //起動中だったら
-                        sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_starting.toString(), server.ID)));
+                        sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_starting.toString(), ID)));
                     } else {
                         //起動済みだったら
-                        sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.ServerStopping_Log.toString(), server.ID)));
+                        sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.ServerStopping_Log.toString(), ID)));
                         server.Exec_command("stop", "", null);
                     }
                 }
@@ -155,7 +167,7 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
 
         Server requestServer = null;
         for(Server server : ConfigData.Server) {
-            if(server.ID.equals(args[0])) {
+            if(server.ID.equals(args[0]) || server.AnotherID.equals(args[0])) {
                 requestServer = server;
                 break;
             }
@@ -167,15 +179,19 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
             return;
         }
 
+        String ID = requestServer.ID;
+        if(!requestServer.AnotherID.equals("")) {
+            ID += "(" + requestServer.AnotherID + ")";
+        }
         if(!requestServer.Enabled) {
             //サーバーが無効だったら
-            sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_disabled.toString(), requestServer.ID)));
+            sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_disabled.toString(), ID)));
             return;
         }
 
         if(requestServer.Started) {
             //起動していたら
-            sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_started.toString(), requestServer.ID)));
+            sender.sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_started.toString(), ID)));
             return;
         }
 

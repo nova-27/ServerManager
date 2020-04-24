@@ -3,9 +3,6 @@ package com.github.nova27.servermanager.utils;
 import com.github.nova27.servermanager.ServerManager;
 import com.github.nova27.servermanager.config.ConfigData;
 import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.entities.Message;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.TextComponent;
 
 import java.awt.*;
 
@@ -15,14 +12,6 @@ import java.awt.*;
 public class Bridge {
     private ServerManager main;
     private DiscordSender main_channel;
-    private static String sendToMinecraft_format;
-    /**
-     * マイクラ宛てメッセージの形式を設定
-     * @param format 形式
-     */
-    public static void setSendToMinecraft_format(String format) {
-        sendToMinecraft_format = format;
-    }
 
     /**
      * コンストラクタ
@@ -32,14 +21,6 @@ public class Bridge {
         this.main = main;
         main_channel = new DiscordSender(main, ConfigData.ChannelId);
         main_channel.start();
-    }
-
-    /**
-     * Minecraftへメッセージを送信
-     * @param message 送信するメッセージ
-     */
-    public void sendToMinecraft(Message message) {
-        ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(sendToMinecraft_format, message.getAuthor().getName(), message.getContentRaw())));
     }
 
     /**

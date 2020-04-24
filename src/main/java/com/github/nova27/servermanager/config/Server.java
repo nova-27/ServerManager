@@ -28,6 +28,7 @@ public class Server implements StandardEventListener {
 
     //Minecraftサーバー設定
     public String ID;
+    public String AnotherID;
     public String Name;
     private String Dir;
     private String File;
@@ -64,6 +65,7 @@ public class Server implements StandardEventListener {
      * コンストラクタ
      * @param main メインのオブジェクト
      * @param ID サーバーID（BungeeCordと同一）
+     * @param AnotherID もう一つのID
      * @param Name サーバー名（表示用）
      * @param Dir サーバーのルートディレクトリ
      * @param File サーバー本体（jar）
@@ -74,9 +76,10 @@ public class Server implements StandardEventListener {
      * @param LogDeleteRegex ログの最初につく無駄な削除する文字列（正規表現）
      * @param LogListCmd listコマンドを実行したときの正規表現
      */
-    public Server(ServerManager main, String ID, String Name, String Dir, String File, String Args, long ConsoleChannelId, String ServerStartingDone, String ServerStopped, String LogDeleteRegex, String LogListCmd) {
+    public Server(ServerManager main, String ID, String AnotherID, String Name, String Dir, String File, String Args, long ConsoleChannelId, String ServerStartingDone, String ServerStopped, String LogDeleteRegex, String LogListCmd) {
         this.main = main;
         this.ID = ID;
+        this.AnotherID = AnotherID;
         this.Name = Name;
         this.Dir = Dir;
         this.File = File;

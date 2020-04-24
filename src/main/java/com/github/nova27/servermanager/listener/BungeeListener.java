@@ -7,6 +7,8 @@ import com.github.nova27.servermanager.request.RequestsManager;
 import com.github.nova27.servermanager.utils.Bridge;
 import com.github.nova27.servermanager.utils.Messages;
 import com.github.nova27.servermanager.utils.minecraft.StandardEventListener;
+import com.gmail.necnionch.myapp.markdownconverter.MarkComponent;
+import com.gmail.necnionch.myapp.markdownconverter.MarkdownConverter;
 import com.gmail.necnionch.myplugin.n8chatcaster.bungee.N8ChatCasterAPI;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -73,7 +75,9 @@ public class BungeeListener implements Listener {
             String senderServer = sender.getServer().getInfo().getName();
             String message = event.getMessage();
 
-            main.bridge.sendToDiscord(Bridge.Formatter(sendToDiscordFormat, senderServer, sender.toString(), message));
+            MarkComponent[] components = MarkdownConverter.fromMinecraftMessage(message, '&');
+            String output = MarkdownConverter.toDiscordMessage(components);
+            main.bridge.sendToDiscord(Bridge.Formatter(sendToDiscordFormat, senderServer, sender.toString(), output));
         }
     }
 
@@ -186,7 +190,7 @@ public class BungeeListener implements Listener {
             }
 
             //タイマーのストップ
-            if(ConfigData.Server[i].ID.equals(e.getPlayer().getServer().getInfo().getName())) {
+            if(ConfigData.Server[i].ID.equals(e.getPlayer().getServer().getInfo().getName()) || ConfigData.Server[i].AnotherID.equals(e.getPlayer().getServer().getInfo().getName())) {
                 ConfigData.Server[i].StopTimer();
                 main.log(Bridge.Formatter(Messages.TimerStopped_Log.toString(), ConfigData.Server[i].Name));
                 main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerStopped_Discord.toString(), ConfigData.Server[i].Name));
@@ -253,7 +257,7 @@ public class BungeeListener implements Listener {
 
         Server targetServer = null;
         for(Server server : ConfigData.Server) {
-            if(server.ID.equals(e.getTarget().getName())) {
+            if(server.ID.equals(e.getTarget().getName()) || server.AnotherID.equals(e.getTarget().getName())) {
                 targetServer = server;
                 break;
             }
@@ -279,9 +283,13 @@ public class BungeeListener implements Listener {
             return;
         }
 
+        String ID = targetServer.ID;
+        if(!targetServer.AnotherID.equals("")) {
+            ID += "(" + targetServer.AnotherID + ")";
+        }
         if(!targetServer.Enabled) {
             //サーバーが無効だったら
-            e.getPlayer().sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_disabled.toString(), targetServer.ID)));
+            e.getPlayer().sendMessage(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_disabled.toString(), ID)));
             return;
         }
 

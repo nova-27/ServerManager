@@ -2,7 +2,7 @@ package com.github.nova27.servermanager.config;
 
 import com.github.nova27.servermanager.ServerManager;
 import com.github.nova27.servermanager.listener.BungeeListener;
-import com.github.nova27.servermanager.utils.Bridge;
+import com.github.nova27.servermanager.listener.DiscordListener;
 import com.github.nova27.servermanager.utils.Messages;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -45,7 +45,7 @@ public class ConfigGetter {
 
         //相互送信形式の設定
         BungeeListener.setSendToDiscordFormat(plugin_configuration.getString("ToDiscord"));
-        Bridge.setSendToMinecraft_format(plugin_configuration.getString("ToMinecraft"));
+        DiscordListener.setSendToMinecraft_format(plugin_configuration.getString("ToMinecraft"));
 
         //サーバー登録情報
         List<String> Server_List = plugin_configuration.getStringList("Server_List");
@@ -53,6 +53,7 @@ public class ConfigGetter {
 
         for(int i =0;  i < Server_List.size(); i++) {
             String Id = Server_List.get(i);
+            String AnotherID = plugin_configuration.getString("Server." + Id + ".AnotherID");
             String Name = plugin_configuration.getString("Server." + Id + ".Name");
             String Dir = plugin_configuration.getString("Server." + Id + ".Dir");
             String File = plugin_configuration.getString("Server." + Id + ".File");
@@ -68,7 +69,7 @@ public class ConfigGetter {
             String LogDeleteRegex = plugin_configuration.getString("Server." + Id + ".advanced.LogDeleteRegex");
             String LogListCmd = plugin_configuration.getString("Server." + Id + ".advanced.LogListCmd");
 
-            ConfigData.Server[i] = new Server(main, Id, Name, Dir, File, Args, Console_ChannelId, ServerStartingDone, ServerStopped, LogDeleteRegex, LogListCmd);
+            ConfigData.Server[i] = new Server(main, Id, AnotherID, Name, Dir, File, Args, Console_ChannelId, ServerStartingDone, ServerStopped, LogDeleteRegex, LogListCmd);
         }
 
         //管理者ユーザーID
