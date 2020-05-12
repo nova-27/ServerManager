@@ -1,6 +1,8 @@
 package com.github.nova27.servermanager.listener;
 
 import com.github.nova27.servermanager.ServerManager;
+import com.gmail.necnionch.myapp.markdownconverter.MarkComponent;
+import com.gmail.necnionch.myapp.markdownconverter.MarkdownConverter;
 import com.gmail.necnionch.myplugin.n8chatcaster.bungee.events.GlobalChatEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
@@ -28,6 +30,8 @@ public class ChatCasterListener implements Listener {
         if (event.isCancelled()) return;
 
         String message = this.main.getChatCasterApi().formatMessageForDiscord(event);
-        this.main.bridge.sendToDiscord(message);
+        MarkComponent[] components = MarkdownConverter.fromMinecraftMessage(message, '&');
+        String output = MarkdownConverter.toDiscordMessage(components);
+        this.main.bridge.sendToDiscord(output);
     }
 }

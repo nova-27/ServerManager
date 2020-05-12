@@ -1,5 +1,9 @@
 /TestServer/
 /.idea/
-/ServerManager.iml
+*.iml
 /target/
 /libs/
+/src/
+/SMFB_BukkitBridge/target
+/SMFB_Common/target
+/SMFB_Core/target

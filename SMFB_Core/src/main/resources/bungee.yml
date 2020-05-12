@@ -1,0 +1,3 @@
+name: SMFBCore
+version: ${project.version}
+main: com.github.nova_27.mcplugin.servermanager.core.Smfb_core

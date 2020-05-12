@@ -1,7 +1,6 @@
 package com.github.nova27.servermanager;
 
 import com.github.nova27.servermanager.config.ConfigData;
-import com.github.nova27.servermanager.config.ConfigGetter;
 import com.github.nova27.servermanager.config.Server;
 import com.github.nova27.servermanager.listener.BungeeListener;
 import com.github.nova27.servermanager.listener.BungeeMinecraftCommand;
@@ -22,9 +21,6 @@ import net.minecrell.serverlistplus.core.status.StatusResponse;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.Locale;
 
 public class ServerManager extends Plugin {
@@ -54,22 +50,6 @@ public class ServerManager extends Plugin {
 	 */
 	@Override
 	public void onEnable() {
-		//言語設定
-		defaultLocale = Locale.getDefault();
-		if(defaultLocale != Locale.JAPAN && defaultLocale != Locale.US && defaultLocale != Locale.FRANCE) {
-			//言語が日本語でも英語でもフランス語でもなかったら
-			Locale.setDefault(Locale.ENGLISH);
-			log(Messages.ChangedLang.toString());
-		}
-
-		//OS判別
-		String OS_NAME = System.getProperty("os.name").toLowerCase();
-		if(!OS_NAME.startsWith("linux") && !OS_NAME.startsWith("windows")) {
-			//Windows・Linux以外の場合
-			log(Messages.UnsupportedOS.toString());
-			pl_enabled = false;
-			onDisable();
-		}
 
 		//イベント登録
 		getProxy().getPluginManager().registerListener(this, new BungeeListener(this));
@@ -92,42 +72,6 @@ public class ServerManager extends Plugin {
 	 */
 	@Override
 	public void onLoad() {
-		try {
-			//configフォルダ
-			if (!getDataFolder().exists()) {
-				getDataFolder().mkdir();
-			}
-
-			//configファイル
-			plugin_config = new File(getDataFolder(), "config.yml");
-			if (!plugin_config.exists()) {
-				//存在しなければコピー
-				InputStream srcIs = getResourceAsStream("config.yml");
-				Files.copy(srcIs, plugin_config.toPath());
-				log(Messages.ConfigNotFound.toString());
-				pl_enabled = false;
-				onDisable();
-			}
-
-			//bungee_configファイル
-			bungee_config = new File(
-					"config.yml");
-			if (!bungee_config.exists()) {
-				log(Messages.BungeeConfigNotFound.toString());
-				pl_enabled = false;
-				onDisable();
-			}
-		} catch (IOException e) {
-			log(Messages.IOError.toString());
-			e.printStackTrace();
-			pl_enabled = false;
-			onDisable();
-		}
-
-		//データを格納
-		log(Messages.ConfigLoading.toString());
-		ConfigGetter.ConfigGet(this, plugin_config, bungee_config);
-
 		//jda設定
 		try {
 			jda = new JDABuilder(ConfigData.Token).build();

@@ -1,7 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.github.nova-27</groupId>
-  <artifactId>ServerManager</artifactId>
+  <groupId>com.github.nova_27.mcplugin.servermanager.parent</groupId>
+  <artifactId>ServerManager_Parent</artifactId>
+  <packaging>pom</packaging>
   <version>0.0.1-SNAPSHOT</version>
 
   <properties>
@@ -9,7 +10,13 @@
     <maven.compiler.source>1.8</maven.compiler.source>
   </properties>
 
-  <repositories>
+  <modules>
+    <module>SMFB_BukkitBridge</module>
+    <module>SMFB_Core</module>
+    <module>SMFB_Common</module>
+  </modules>
+
+  <!--<repositories>
     <repository>
       <snapshots>
         <enabled>false</enabled>
@@ -77,51 +84,14 @@
       <type>javadoc</type>
       <scope>provided</scope>
     </dependency>
-  </dependencies>
+  </dependencies>-->
 
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/classes</outputDirectory>
-              <includeArtifactIds>markdownconverter</includeArtifactIds>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.1</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>org.sonatype.haven.HavenCli</mainClass>
-                </transformer>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>

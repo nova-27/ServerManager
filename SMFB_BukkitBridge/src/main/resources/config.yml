@@ -1,0 +1,4 @@
+# Socket settings
+Socket:
+  IP: localhost
+  Port: 30000

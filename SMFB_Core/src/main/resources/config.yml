@@ -1,0 +1,24 @@
+# 省電力自動サーバー停止機能
+# Power saving automatic server stop function
+CloseTime: [全プレイヤー退出の何分後に閉じるか(How many minutes after all players leave to close)]
+
+# ソケット通信に関する設定
+SocketPort: 30000
+
+# 各サーバーの設定 (Server Settings)
+# [形式(Format)]
+# ServerList:
+# - {ID}
+# Server:
+#   {ID}:
+#     Name: ...
+# {ID}は Bungeecordのconfig.ymlと同じでなければいけません
+# ({ID} must be the same as the setting in Bungeecord config.yml)
+Server_List:
+- Server1
+Server:
+  Server1:
+    Name: [サーバーの名前(ServerName)]
+    Dir: [サーバー1のディレクトリ(Server root directory)]
+    File: [サーバー1の実行ファイル名(Server jar file name)]
+    Args: [引数(-jarは不要) (Arguments [Don't include -jar argument])]

@@ -13,7 +13,6 @@ import com.gmail.necnionch.myplugin.n8chatcaster.bungee.N8ChatCasterAPI;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
@@ -111,69 +110,6 @@ public class BungeeListener implements Listener {
                 Lobby.StopTimer();
                 main.log(Bridge.Formatter(Messages.TimerStopped_Log.toString(), Lobby.Name));
                 main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerStopped_Discord.toString(), Lobby.Name));
-            }
-        }
-    }
-
-    /**
-     * ログアウトされたら
-     * @param e ログアウト情報
-     */
-    @EventHandler
-    public void onLogout(PlayerDisconnectEvent e) {
-        main.bridge.PlayerCount(-1);
-        String name = e.getPlayer().getName();
-        main.bridge.sendToDiscord(Bridge.Formatter(Messages.LeavedTheGame.toString(), name));
-
-        if (main.bridge.PlayerCount(0) == 0) {
-            //0人になったら
-            Lobby.StartTimer();
-            main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerStarted_Discord.toString(), ""+ConfigData.CloseTime, Lobby.Name));
-            main.log(Bridge.Formatter(Messages.TimerStarted_Log.toString(), ""+ConfigData.CloseTime, Lobby.Name));
-        }
-
-        for(Server server : ConfigData.Server) {
-            if (server != Lobby && server.Started && !server.Switching) {
-                Timer timer = new Timer(false);
-                TimerTask task = new TimerTask() {
-                    @Override
-                    public void run() {
-                        final int[] result = new int[]{0};
-                        server.Exec_command("list", server.getLogListCmd(), new StandardEventListener() {
-                            @Override
-                            public void exec(String result_tmp) {
-                                Matcher m = Pattern.compile("[0-9]+").matcher(result_tmp);
-
-                                if (m.find()) {
-                                    if (Integer.parseInt(m.group()) == 0) {
-                                        result[0] = 1;
-                                    } else {
-                                        result[0] = 2;
-                                    }
-                                }
-                            }
-                        });
-
-                        while (result[0] == 0) {
-                            //処理が終わるまで待機
-                            try {
-                                Thread.sleep(100);
-                            } catch (InterruptedException ex) {
-                                ex.printStackTrace();
-                            }
-                        }
-                        if (result[0] == 1) {
-                            //0人だったらタイマー起動
-                            if (server.StartTimer()) {
-                                //タイマーが起動していなかったら
-                                main.bridge.sendToDiscord(Bridge.Formatter(Messages.TimerStarted_Discord.toString(), "" + ConfigData.CloseTime, server.Name));
-                                main.log(Bridge.Formatter(Messages.TimerStarted_Log.toString(), "" + ConfigData.CloseTime, server.Name));
-                                ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.TimerStarted_Minecraft.toString(), "" + ConfigData.CloseTime, server.Name)));
-                            }
-                        }
-                    }
-                };
-                timer.schedule(task, 3000);
             }
         }
     }
