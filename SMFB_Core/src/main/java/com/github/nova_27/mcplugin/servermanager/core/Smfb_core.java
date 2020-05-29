@@ -6,6 +6,7 @@ import com.github.nova_27.mcplugin.servermanager.core.config.ConfigData;
 import com.github.nova_27.mcplugin.servermanager.core.config.ConfigGetter;
 import com.github.nova_27.mcplugin.servermanager.core.config.Server;
 import com.github.nova_27.mcplugin.servermanager.core.listener.BungeeListener;
+import com.github.nova_27.mcplugin.servermanager.core.listener.BungeeMinecraftCommand;
 import com.github.nova_27.mcplugin.servermanager.core.socket.ClientConnection;
 import com.github.nova_27.mcplugin.servermanager.core.socket.SocketServer;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Messages;
@@ -20,6 +21,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Locale;
+
+import static com.github.nova_27.mcplugin.servermanager.core.config.ConfigData.Lobby;
 
 public final class Smfb_core extends Plugin implements PacketEventListener {
 
@@ -48,6 +51,9 @@ public final class Smfb_core extends Plugin implements PacketEventListener {
 
         //イベント登録
         getProxy().getPluginManager().registerListener(this, new BungeeListener());
+
+        //コマンド登録
+        getProxy().getPluginManager().registerCommand(this, new BungeeMinecraftCommand());
 
         //言語設定
         defaultLocale = Locale.getDefault();
@@ -88,7 +94,7 @@ public final class Smfb_core extends Plugin implements PacketEventListener {
             socketServer.start();
 
             // サーバーを起動
-            ConfigData.Lobby.StartServer();
+            Lobby.StartServer();
         } catch (IOException e) {
             log(Messages.IOError.toString());
         }
@@ -100,7 +106,7 @@ public final class Smfb_core extends Plugin implements PacketEventListener {
             server.StopServer();
         }
         for(Server server : ConfigData.Servers) {
-            while(server.Started || server.Switching && server.Process.isAlive()) {
+            while((server.Started || server.Switching) && server.Process.isAlive()) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -110,6 +116,8 @@ public final class Smfb_core extends Plugin implements PacketEventListener {
         }
 
         socketServer.stopSocket();
+
+        Locale.setDefault(defaultLocale);
     }
 
     /** ログを出力する
@@ -149,6 +157,9 @@ public final class Smfb_core extends Plugin implements PacketEventListener {
 
     @Override
     public void PlayerCountResponse(byte[] gotData, ConnectionThread ct) {
+        Server srcServer = ((ClientConnection)ct).getSrcServer();
+        if(srcServer == Lobby) return;
+
         byte[] playerCount_byte = Arrays.copyOfRange(gotData, 0, 4);
         int playerCount = (((short) playerCount_byte[0]) & 0x00FF) * 16777216 +
                 (((short) playerCount_byte[1]) & 0x00FF) * 65536 +
@@ -156,10 +167,14 @@ public final class Smfb_core extends Plugin implements PacketEventListener {
                 (((short) playerCount_byte[3]) & 0x00FF);
 
         if(playerCount == 0) {
-            Server srcServer = ((ClientConnection)ct).getSrcServer();
             if(srcServer.StartTimer()) {
                 log(Tools.Formatter(Messages.TimerStarted_log.toString(), "" + ConfigData.CloseTime, srcServer.Name));
                 ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.TimerStarted_Minecraft.toString(), "" + ConfigData.CloseTime, srcServer.Name)));
+            }
+        }else{
+            if(srcServer.StopTimer()) {
+                Smfb_core.getInstance().log(Tools.Formatter(Messages.TimerStopped_log.toString(), srcServer.Name));
+                ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.TimerStopped_Minecraft.toString(), srcServer.Name)));
             }
         }
     }

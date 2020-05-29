@@ -9,6 +9,7 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
+import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
@@ -72,6 +73,13 @@ public class BungeeListener implements Listener {
                 Smfb_core.getInstance().log(Tools.Formatter(Messages.TimerStopped_log.toString(), server.Name));
                 ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.TimerStopped_Minecraft.toString(), server.Name)));
             }
+        }
+    }
+
+    @EventHandler
+    public void onConnect(ServerConnectEvent e) {
+        for(Server server : ConfigData.Servers) {
+            server.AliveCheck();
         }
     }
 }

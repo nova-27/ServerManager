@@ -1,6 +1,6 @@
-package com.github.nova27.servermanager.command;
+package com.github.nova_27.mcplugin.servermanager.core.command;
 
-import com.github.nova27.servermanager.utils.Messages;
+import com.github.nova_27.mcplugin.servermanager.core.utils.Messages;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Command;

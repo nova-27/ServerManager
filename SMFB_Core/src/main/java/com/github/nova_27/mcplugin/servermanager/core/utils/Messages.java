@@ -36,7 +36,41 @@ public enum Messages {
     ServerStopping_log,
     ServerStopping_Minecraft,
     ServerStopped_log,
-    ServerStopped_minecraft;
+    ServerStopped_minecraft,
+
+    BungeeCommand_starting,
+    BungeeCommand_started,
+    BungeeCommand_stopping,
+    BungeeCommand_stopped,
+    BungeeCommand_start,
+    BungeeCommand_disabled,
+    BungeeCommand_servernotfound,
+    BungeeCommand_notfound,
+    BungeeCommand_syntaxerror,
+    BungeeCommand_help_1,
+    BungeeCommand_help_helpcmd,
+    BungeeCommand_help_listcmd,
+    BungeeCommand_help_startcmd,
+    BungeeCommand_help_stopcmd,
+    BungeeCommand_help_statuscmd,
+    BungeeCommand_help_enablecmd,
+    BungeeCommand_help_disablecmd,
+    BungeeCommand_lobby_error,
+    BungeeCommand_denied,
+
+    BungeeCommand_status,
+    BungeeCommand_status_process,
+
+    ServerStatus_disabled,
+    ServerStatus_started,
+    ServerStatus_starting,
+    ServerStatus_stopped,
+    ServerStatus_stopping,
+
+    EnableDisableCommand_sameflag,
+    EnableDisableCommand_changedflag,
+
+    ProcessDied;
 
     /**
      * propertiesファイルからメッセージを取ってくる

@@ -122,18 +122,45 @@ public class Server {
     /**
      * タイマーのストップ
      */
-    public void StopTimer() {
-        if(task != null) {
-            task.cancel();
-            task = null;
+    public boolean StopTimer() {
+        if(task == null) return false;
+
+        task.cancel();
+        task = null;
+        return true;
+    }
+
+    /**
+     * サーバーが動いているかチェックする
+     */
+    public void AliveCheck() {
+        if((Started || Switching) && !Process.isAlive()) {
+            ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.ProcessDied.toString(), Name)));
+            Switching = false;
+            Started = false;
         }
+    }
+
+    /**
+     * サーバーIDからサーバーを取得する
+     * @param ID サーバーID
+     * @return サーバー
+     */
+    public static Server getServerByID(String ID) {
+        for(Server server : ConfigData.Servers) {
+            if(server.ID.equals(ID)) {
+                return server;
+            }
+        }
+
+        return null;
     }
 
     /**
      * サーバーのステータスを文字で返す
      * @return ステータス
      */
-    /*public String Status() {
+    public String Status() {
         if(!Enabled) return Messages.ServerStatus_disabled.toString();
 
         if(Started) {
@@ -149,5 +176,5 @@ public class Server {
                 return Messages.ServerStatus_stopping.toString();
             }
         }
-    }*/
+    }
 }

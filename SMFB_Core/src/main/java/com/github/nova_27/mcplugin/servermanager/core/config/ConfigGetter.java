@@ -50,6 +50,7 @@ public class ConfigGetter {
             for(ServerInfo serverInfo : servers_map.values()) {
                 if (serverInfo.getName().equals(Id)) {
                     Port = serverInfo.getAddress().getPort();
+                    break;
                 }
             }
 
@@ -58,18 +59,9 @@ public class ConfigGetter {
 
         //ロビーサーバーを取得
         String lobbyName = null;
-        searchLobby:
         for (ListenerInfo li : Smfb_core.getInstance().getProxy().getConfig().getListeners()) {
-            for(String srvName : li.getServerPriority()){
-                lobbyName = srvName;
-                break searchLobby;
-            }
+            lobbyName = li.getServerPriority().get(0);
         }
-        for(Server server : ConfigData.Servers) {
-            if(server.ID.equals(lobbyName)) {
-                ConfigData.Lobby = server;
-                break;
-            }
-        }
+        ConfigData.Lobby = Server.getServerByID(lobbyName);
     }
 }

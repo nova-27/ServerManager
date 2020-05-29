@@ -1,19 +1,9 @@
 package com.github.nova_27.mcplugin.servermanager.core.utils;
 
 /**
- * MinecraftとDiscordのリンクに関するユーティリティ
+ * ツール
  */
 public class Tools {
-    /**
-     * プレイヤー数をカウント
-     * @param plus 増やす数
-     * @return プレイヤー数
-     */
-    /*public int PlayerCount(int plus) {
-        main.p_count += plus;
-        return main.p_count;
-    }*/
-
     /**
      * 文字列の{0},{1},{2},...をargsで置き換える
      * @param original もとの文字

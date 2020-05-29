@@ -1,4 +1,4 @@
-package com.github.nova27.servermanager.command;
+package com.github.nova_27.mcplugin.servermanager.core.command;
 
 import net.md_5.bungee.api.CommandSender;
 
