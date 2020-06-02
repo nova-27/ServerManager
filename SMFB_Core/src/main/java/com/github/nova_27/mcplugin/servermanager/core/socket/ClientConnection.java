@@ -9,6 +9,7 @@ import com.github.nova_27.mcplugin.servermanager.core.utils.Tools;
 import net.md_5.bungee.api.chat.TextComponent;
 
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 public class ClientConnection extends ConnectionThread {
     Server srcServer;
@@ -33,10 +34,19 @@ public class ClientConnection extends ConnectionThread {
 
     @Override
     public void finalProgress() {
-        getSrcServer().Started = false;
-        getSrcServer().Switching = false;
+        Smfb_core.getInstance().getProxy().getScheduler().schedule(Smfb_core.getInstance(), ()->{
+            try {
+                srcServer.Process.waitFor();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            srcServer.Process.destroy();
 
-        Smfb_core.getInstance().log(Tools.Formatter(Messages.ServerStopped_log.toString(), srcServer.Name));
-        Smfb_core.getInstance().getProxy().broadcast(new TextComponent(Tools.Formatter(Messages.ServerStopped_minecraft.toString(), srcServer.Name)));
+            getSrcServer().Started = false;
+            getSrcServer().Switching = false;
+
+            Smfb_core.getInstance().log(Tools.Formatter(Messages.ServerStopped_log.toString(), srcServer.Name));
+            Smfb_core.getInstance().getProxy().broadcast(new TextComponent(Tools.Formatter(Messages.ServerStopped_minecraft.toString(), srcServer.Name)));
+        }, 0L, TimeUnit.SECONDS);
     }
 }

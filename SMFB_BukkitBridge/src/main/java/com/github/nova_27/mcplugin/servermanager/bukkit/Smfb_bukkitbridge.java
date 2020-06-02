@@ -15,13 +15,13 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutionException;
 
-public final class SFMB_BukkitBridge extends JavaPlugin implements PacketEventListener {
+public final class Smfb_bukkitbridge extends JavaPlugin implements PacketEventListener {
     private static final int TRY = 3;
 
-    private static SFMB_BukkitBridge instance;
+    private static Smfb_bukkitbridge instance;
     public ConnectionThread connectionThread;
 
-    public static SFMB_BukkitBridge getInstance() {
+    public static Smfb_bukkitbridge getInstance() {
         return instance;
     }
 

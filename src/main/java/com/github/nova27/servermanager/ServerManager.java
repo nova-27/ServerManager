@@ -1,9 +1,7 @@
 package com.github.nova27.servermanager;
 
 import com.github.nova27.servermanager.config.ConfigData;
-import com.github.nova27.servermanager.config.Server;
 import com.github.nova27.servermanager.listener.BungeeListener;
-import com.github.nova27.servermanager.listener.BungeeMinecraftCommand;
 import com.github.nova27.servermanager.listener.ChatCasterListener;
 import com.github.nova27.servermanager.listener.DiscordListener;
 import com.github.nova27.servermanager.utils.Bridge;
@@ -51,11 +49,7 @@ public class ServerManager extends Plugin {
 	@Override
 	public void onEnable() {
 
-		//イベント登録
-		getProxy().getPluginManager().registerListener(this, new BungeeListener(this));
 
-		//コマンド登録
-		getProxy().getPluginManager().registerCommand(this, new BungeeMinecraftCommand());
 
 		//プラグイン連携 N8ChatListener
 		Plugin temp = getProxy().getPluginManager().getPlugin("N8ChatCaster");
@@ -118,36 +112,8 @@ public class ServerManager extends Plugin {
 	 */
 	@Override
 	public void onDisable() {
-		if(!pl_enabled){
-			//プラグインが無効だったら
-			super.onDisable();
-			return;
-		}
 
-		//サーバーを停止
-		getLogger().info(Messages.AllServerStopping_Log.toString());
-		bridge.sendToDiscord(Messages.AllServerStopping_Discord.toString());
-		for(Server server : ConfigData.Server) {
-			server.StopTimer();
 
-			while(server.Switching) {
-				//切り替えが終わるまで待機
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-
-			if(server.Exec_command("stop", "", null)) {
-				//コマンドの実行に成功したら(起動していたら)
-				try {
-					server.Process.waitFor();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 
 		//ボットの停止
 		jda.getTextChannelById(ConfigData.ChannelId).sendMessage(Bridge.Formatter(Messages.ProxyStopped.toString(), ConfigData.ServerName)).complete();
@@ -156,13 +122,6 @@ public class ServerManager extends Plugin {
 
 		Locale.setDefault(defaultLocale);
 		super.onDisable();
-	}
-
-	/** ログを出力する
-	 * @param log 出力する文字
-	 */
-	public void log(String log) {
-		getLogger().info(log);
 	}
 
 	/**

@@ -1,5 +1,5 @@
-name: SFMB_BukkitBridge
+name: SFMBBukkitBridge
 version: ${project.version}
-main: com.github.nova_27.mcplugin.servermanager.bukkit.SFMB_BukkitBridge
+main: com.github.nova_27.mcplugin.servermanager.bukkit.Smfb_bukkitbridge
 api-version: 1.13
 authors: [nova27]

@@ -9,9 +9,11 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 public class Server {
     //Minecraftサーバー設定
@@ -24,6 +26,7 @@ public class Server {
 
     //サーバープロセス
     public Process Process = null;
+    private InputStream ProcessInputStream; //読みださないとブロックされる
     public boolean Started = false;
     public boolean Switching = false;
     public boolean Enabled = true;
@@ -69,6 +72,22 @@ public class Server {
                     Runtime r = Runtime.getRuntime();
                     Process = r.exec("cmd /c cd " + Dir + " && java -jar " + Args + " " + File);
                 }
+
+                //バッファを読みだしてブロックを防ぐ
+                ProcessInputStream = Process.getInputStream();
+                Smfb_core.getInstance().getProxy().getScheduler().schedule(Smfb_core.getInstance(), ()->{
+                    try {
+                        while(ProcessInputStream.read() >= 0);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        try {
+                            ProcessInputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, 0L, TimeUnit.SECONDS);
 
                 Smfb_core.getInstance().log(Tools.Formatter(Messages.ServerStarting_log.toString(), Name));
                 ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.ServerStarting_minecraft.toString(), Name)));
@@ -138,6 +157,7 @@ public class Server {
             ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.ProcessDied.toString(), Name)));
             Switching = false;
             Started = false;
+            Process.destroy();
         }
     }
 

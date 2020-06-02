@@ -1,0 +1,4 @@
+name: SMFBDiscord
+version: ${project.version}
+main: com.github.nova_27.mcplugin.servermanager.discord.Smfb_discord
+depend: [SMFBCore]
