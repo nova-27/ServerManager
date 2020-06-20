@@ -114,6 +114,9 @@ public class ProtocolUtils {
             case ServerStopResponse:
                 pel.ServerStopResponse(gotData, ct);
                 break;
+            case SendCommand:
+                pel.SendCommand(gotData, ct);
+                break;
         }
 
         if(tmp_init) return new byte[TMP_SIZE];

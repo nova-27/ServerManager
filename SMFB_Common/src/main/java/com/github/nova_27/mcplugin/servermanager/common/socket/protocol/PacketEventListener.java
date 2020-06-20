@@ -12,4 +12,6 @@ public interface PacketEventListener {
     void ServerStopRequest(byte[] gotData, ConnectionThread ct);
 
     void ServerStopResponse(byte[] gotData, ConnectionThread ct);
+
+    void SendCommand(byte[] gotData, ConnectionThread ct);
 }

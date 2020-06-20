@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 public final class Smfb_bukkitbridge extends JavaPlugin implements PacketEventListener {
@@ -107,5 +109,17 @@ public final class Smfb_bukkitbridge extends JavaPlugin implements PacketEventLi
     @Override
     public void ServerStopResponse(byte[] gotData, ConnectionThread ct) {
 
+    }
+
+    @Override
+    public void SendCommand(byte[] gotData, ConnectionThread ct) {
+        int length;
+        for(length = 0; gotData[length] != 0x00; length++);
+
+        String command = new String(Arrays.copyOfRange(gotData, 0, length), StandardCharsets.UTF_8);
+        try {
+            Bukkit.getScheduler().callSyncMethod( this, () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command) ).get();
+        } catch (InterruptedException | ExecutionException ignored) {
+        }
     }
 }

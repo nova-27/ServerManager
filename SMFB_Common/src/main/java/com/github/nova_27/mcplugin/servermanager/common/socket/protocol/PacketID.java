@@ -9,6 +9,7 @@ public enum PacketID {
     PlayerCountResponse(0x04),
     ServerStopRequest(0x05),
     ServerStopResponse(0x06),
+    SendCommand(0x07),
     UNKNOWN(0xFF);
 
     private byte id;

@@ -38,7 +38,6 @@ public class Server extends TimerTask {
     //ログ
     private static final int BUF_CNT = 30;
     private int Start_write = 0;
-    private int Start_read = -1;   //-1はログを破棄する
     private String[] logs = new String[BUF_CNT];
 
     //タイマー
@@ -206,28 +205,21 @@ public class Server extends TimerTask {
     }
 
     /**
-     * ログを読む
+     * 最新ログを読む
+     * @param num 読むログの行数
      * @return ログ
      */
-    public String getLog() {
-        //ログを破棄していたら、いったん変数をリセット
-        if(Start_read == -1) {
-            Start_write = 0;
-            Start_read = 0;
-            logs = new String[BUF_CNT];
+    public String getLatestLog(int num) {
+        int reading = Start_write - 1;
+        String readLogs = "";
+
+        for(int i = 0; i <= num; i++) {
+            if(logs[reading] == null) break;
+            readLogs += logs[reading] + "\n";
+            reading--;
         }
 
-        if (Start_read >= BUF_CNT) {
-            Start_read = 0;
-        }
-
-        String log;
-        if((log = logs[Start_read]) != null){
-            Start_read++;
-            return log;
-        }
-
-        return null;
+        return readLogs;
     }
 
     /**

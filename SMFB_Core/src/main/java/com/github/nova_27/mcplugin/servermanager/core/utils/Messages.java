@@ -1,9 +1,9 @@
 package com.github.nova_27.mcplugin.servermanager.core.utils;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Locale;
+import com.github.nova_27.mcplugin.servermanager.core.Smfb_core;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.PropertyResourceBundle;
 
 /**
@@ -55,6 +55,7 @@ public enum Messages {
     BungeeCommand_help_statuscmd,
     BungeeCommand_help_enablecmd,
     BungeeCommand_help_disablecmd,
+    BungeeCommand_help_sendcmdCmd,
     BungeeCommand_lobby_error,
     BungeeCommand_denied,
 
@@ -70,6 +71,10 @@ public enum Messages {
     EnableDisableCommand_sameflag,
     EnableDisableCommand_changedflag,
 
+    ServerIsNotOnline,
+    SentCommand,
+    ShowLogs,
+
     ProcessDied;
 
     /**
@@ -79,14 +84,13 @@ public enum Messages {
     @Override
     public String toString() {
         try {
-            try (InputStream is = getClass().getClassLoader().getResourceAsStream(Locale.getDefault().toString()+".properties");
-                 InputStreamReader isr = new InputStreamReader(is, "UTF-8");
-                 BufferedReader reader = new BufferedReader(isr)) {
-                return new PropertyResourceBundle(reader).getString(name());
-            }
-        }catch(Exception ex) {
-            ex.printStackTrace();
-            return null;
+            File message_file = new File(Smfb_core.getInstance().getDataFolder(), "message.yml");
+            InputStreamReader fileReader = new InputStreamReader(new FileInputStream(message_file), StandardCharsets.UTF_8);
+            BufferedReader reader = new BufferedReader(fileReader);
+
+            return new PropertyResourceBundle(reader).getString(name());
+        }catch (IOException e) {
+            return "";
         }
     }
 }

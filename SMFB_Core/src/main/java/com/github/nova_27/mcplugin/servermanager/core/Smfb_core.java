@@ -71,6 +71,20 @@ public final class Smfb_core extends Plugin implements PacketEventListener {
             log(Messages.ChangedLang.toString());
         }
 
+        //言語ファイル
+        File language_file = new File(getDataFolder(), "message.yml");
+        if (!language_file.exists()) {
+            //存在しなければコピー
+            InputStream src = getResourceAsStream(Locale.getDefault().toString() + ".properties");
+            if(src == null) src = getResourceAsStream("ja_JP.properties");
+
+            try {
+                Files.copy(src, language_file.toPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         //OS判別
         String OS_NAME = System.getProperty("os.name").toLowerCase();
         if(!OS_NAME.startsWith("linux") && !OS_NAME.startsWith("windows")) {
@@ -225,5 +239,10 @@ public final class Smfb_core extends Plugin implements PacketEventListener {
     public void ServerStopResponse(byte[] gotData, ConnectionThread ct) {
         ClientConnection cc = (ClientConnection) ct;
         cc.stopSocket();
+    }
+
+    @Override
+    public void SendCommand(byte[] gotData, ConnectionThread ct) {
+
     }
 }

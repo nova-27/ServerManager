@@ -1,14 +1,20 @@
 package com.github.nova_27.mcplugin.servermanager.core.listener;
 
+import com.github.nova_27.mcplugin.servermanager.common.socket.protocol.PacketID;
 import com.github.nova_27.mcplugin.servermanager.core.Smfb_core;
 import com.github.nova_27.mcplugin.servermanager.core.command.MinecraftCommandExecutor;
 import com.github.nova_27.mcplugin.servermanager.core.config.ConfigData;
 import com.github.nova_27.mcplugin.servermanager.core.config.Server;
 import com.github.nova_27.mcplugin.servermanager.core.events.ServerEvent;
+import com.github.nova_27.mcplugin.servermanager.core.socket.ClientConnection;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Messages;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Tools;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * BungeeCordコマンド
@@ -23,6 +29,7 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
     private static final String STATUS_PERM = "status";
     private static final String ENABLE_PERM = "enable";
     private static final String DISABLE_PERM = "disable";
+    private static final String SEND_CMD_PERM = "send-cmd";
 
     /**
      * コンストラクタ
@@ -36,6 +43,7 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
         addSubCommand(new MinecraftSubCommandBuilder("status", STATUS_PERM, this::statusCmd).requireArgs(1));
         addSubCommand(new MinecraftSubCommandBuilder("enable", ENABLE_PERM, this::enableCmd).requireArgs(1));
         addSubCommand(new MinecraftSubCommandBuilder("disable", DISABLE_PERM, this::disableCmd).requireArgs(1));
+        addSubCommand(new MinecraftSubCommandBuilder("send-cmd", SEND_CMD_PERM, this::sendcmd_Cmd).requireArgs(2));
     }
 
     /**
@@ -50,6 +58,7 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
         sender.sendMessage(new TextComponent(Messages.BungeeCommand_help_statuscmd.toString()));
         sender.sendMessage(new TextComponent(Messages.BungeeCommand_help_enablecmd.toString()));
         sender.sendMessage(new TextComponent(Messages.BungeeCommand_help_disablecmd.toString()));
+        sender.sendMessage(new TextComponent(Messages.BungeeCommand_help_sendcmdCmd.toString()));
     }
 
     /**
@@ -230,6 +239,39 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
         server.Enabled = false;
         sender.sendMessage(new TextComponent(Tools.Formatter(Messages.EnableDisableCommand_changedflag.toString(), server.Name, "true")));
         Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new ServerEvent(server, ServerEvent.EventType.ServerDisabled));
+    }
+
+    /**
+     * コマンド送信コマンド
+     */
+    public void sendcmd_Cmd(CommandSender sender, String[] args) {
+        Server server = Server.getServerByID(args[0]);
+        //サーバーが見つからなかったら
+        if(server == null) {
+            sender.sendMessage(new TextComponent(Tools.Formatter(Messages.BungeeCommand_servernotfound.toString(), args[0])));
+            return;
+        }
+
+        //コマンドを構成
+        String command = "";
+        for(int i = 1; i < args.length; i++) {
+            command += args[i] + " ";
+        }
+
+        //コマンドを送信
+        for(ClientConnection cc : Smfb_core.getInstance().getSocketServer().getClientConnections()) {
+            if(Objects.equals(cc.getSrcServer(), server)) { ;
+                cc.addQueue(PacketID.SendCommand, command.getBytes(StandardCharsets.UTF_8));
+
+                sender.sendMessage(new TextComponent(Tools.Formatter(Messages.SentCommand.toString(), server.Name)));
+                sender.sendMessage(new TextComponent(Messages.ShowLogs.toString()));
+                Smfb_core.getInstance().getProxy().getScheduler().schedule(Smfb_core.getInstance(), ()-> sender.sendMessage(new TextComponent(server.getLatestLog(5))), 2L, TimeUnit.SECONDS);
+
+                return;
+            }
+        }
+
+        sender.sendMessage(new TextComponent(Tools.Formatter(Messages.ServerIsNotOnline.toString(), server.Name)));
     }
 
     /**
