@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.github.nova_27.mcplugin.servermanager.core.events.TimerEvent.EventType.TimerRestarted;
 
-public class Server extends TimerTask {
+public class Server {
     //Minecraftサーバー設定
     public String ID;
     public String Name;
@@ -60,6 +60,10 @@ public class Server extends TimerTask {
         this.Dir = Dir;
         this.File = File;
         this.Args = Args;
+    }
+
+    private Server getServer() {
+        return this;
     }
 
     /**
@@ -133,7 +137,29 @@ public class Server extends TimerTask {
      */
     public boolean StartTimer() {
         if (task == null) {
-            task = this;
+            task = new TimerTask() {
+                @Override
+                public void run() {
+                    if(!Switching) {
+                        //処理中でなかったら
+                        Smfb_core.getInstance().log(Tools.Formatter(Messages.ServerStopping_log.toString(), Name));
+                        ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.ServerStopping_Minecraft.toString(), Name)));
+                        Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new ServerEvent(getServer(), ServerEvent.EventType.ServerStopping));
+
+                        StopServer();
+                    }else{
+                        //処理中だったら見送り
+                        Smfb_core.getInstance().log(Tools.Formatter(Messages.TimerRestarted_log.toString(), Name));
+                        ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.TimerRestarted_Minecraft.toString(), Name)));
+                        Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new TimerEvent(getServer(), TimerRestarted));
+
+                        TimerTask task = this;
+                        timer = new Timer();
+                        timer.schedule(task, ConfigData.CloseTime * 60000);
+                    }
+                }
+            };
+
             timer = new Timer();
             timer.schedule(task, ConfigData.CloseTime * 60000);
 
@@ -220,29 +246,5 @@ public class Server extends TimerTask {
         }
 
         return readLogs;
-    }
-
-    /**
-     * タイマータスク
-     */
-    @Override
-    public void run() {
-        if(!Switching) {
-            //処理中でなかったら
-            Smfb_core.getInstance().log(Tools.Formatter(Messages.ServerStopping_log.toString(), Name));
-            ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.ServerStopping_Minecraft.toString(), Name)));
-            Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new ServerEvent(this, ServerEvent.EventType.ServerStopping));
-
-            StopServer();
-        }else{
-            //処理中だったら見送り
-            Smfb_core.getInstance().log(Tools.Formatter(Messages.TimerRestarted_log.toString(), Name));
-            ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.TimerRestarted_Minecraft.toString(), Name)));
-            Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new TimerEvent(this, TimerRestarted));
-
-            TimerTask task = this;
-            timer = new Timer();
-            timer.schedule(task, ConfigData.CloseTime * 60000);
-        }
     }
 }

@@ -10,7 +10,6 @@ import java.util.PropertyResourceBundle;
  * 多言語対応メッセージ
  */
 public enum Messages {
-    ChangedLang,
     UnsupportedOS,
 
     ConfigNotFound,

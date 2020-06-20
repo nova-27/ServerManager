@@ -35,7 +35,6 @@ import static com.github.nova_27.mcplugin.servermanager.core.events.TimerEvent.E
 public final class Smfb_core extends Plugin implements PacketEventListener {
 
     private static Smfb_core instance;
-    private Locale defaultLocale;
 
     private SocketServer socketServer;
 
@@ -62,14 +61,6 @@ public final class Smfb_core extends Plugin implements PacketEventListener {
 
         //コマンド登録
         getProxy().getPluginManager().registerCommand(this, new BungeeMinecraftCommand());
-
-        //言語設定
-        defaultLocale = Locale.getDefault();
-        if(defaultLocale != Locale.JAPAN) {
-            //言語が日本語でもなかったら
-            Locale.setDefault(Locale.JAPAN);
-            log(Messages.ChangedLang.toString());
-        }
 
         //言語ファイル
         File language_file = new File(getDataFolder(), "message.yml");
@@ -164,8 +155,6 @@ public final class Smfb_core extends Plugin implements PacketEventListener {
         }
 
         socketServer.stopSocket();
-
-        Locale.setDefault(defaultLocale);
     }
 
     /** ログを出力する
