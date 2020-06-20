@@ -79,5 +79,13 @@
             <artifactId>SMFB_Common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>net.minecrell</groupId>
+            <artifactId>serverlistplus</artifactId>
+            <version>3.4</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/../libs/ServerListPlus-3.4.8-Universal.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

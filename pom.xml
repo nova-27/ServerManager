@@ -62,13 +62,7 @@
       <systemPath>${basedir}/libs/N8ChatCaster.jar</systemPath>
     </dependency>
 
-    <dependency>
-      <groupId>net.minecrell</groupId>
-      <artifactId>serverlistplus</artifactId>
-      <version>3.4</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/libs/ServerListPlus-3.4.8-Universal.jar</systemPath>
-    </dependency>
+
 
     <dependency>
       <groupId>net.md-5</groupId>

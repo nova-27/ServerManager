@@ -16,6 +16,11 @@ import com.github.nova_27.mcplugin.servermanager.core.utils.Tools;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.minecrell.serverlistplus.bungee.BungeePlugin;
+import net.minecrell.serverlistplus.core.ServerListPlusCore;
+import net.minecrell.serverlistplus.core.replacement.LiteralPlaceholder;
+import net.minecrell.serverlistplus.core.replacement.ReplacementManager;
+import net.minecrell.serverlistplus.core.status.StatusResponse;
 
 import java.io.File;
 import java.io.IOException;
@@ -100,6 +105,32 @@ public final class Smfb_core extends Plugin implements PacketEventListener {
             Lobby.StartServer();
         } catch (IOException e) {
             log(Messages.IOError.toString());
+        }
+
+        //プラグイン連携 ServerListPlus
+        Plugin temp2 = getProxy().getPluginManager().getPlugin("ServerListPlus");
+        if (temp2 instanceof BungeePlugin) {
+            ReplacementManager.getDynamic().add(new LiteralPlaceholder("%lobby_status%") {
+                /**
+                 * プレイヤーがpingを送信したとき
+                 */
+                @Override
+                public String replace(StatusResponse response, String s) {
+                    if(Lobby != null) {
+                        return this.replace(s, Lobby.Status());
+                    }else{
+                        return "--";
+                    }
+                }
+
+                /**
+                 * Unknown Player
+                 */
+                @Override
+                public String replace(ServerListPlusCore core, String s) {
+                    return "";
+                }
+            });
         }
     }
 
