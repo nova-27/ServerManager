@@ -50,7 +50,7 @@ public class ProtocolUtils {
             );
 
             addSendQueue(id, sendData, queue);
-        } else if(data.length > DATASIZE-1) {
+        } else {
             int from;
             for(from = 0; from <= data.length-100; from+=99) {
                 byte[] sendData = new byte[DATASIZE-1];

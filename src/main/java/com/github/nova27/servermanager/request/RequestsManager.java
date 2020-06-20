@@ -1,9 +1,6 @@
 package com.github.nova27.servermanager.request;
 
 import com.github.nova27.servermanager.config.ConfigData;
-import com.github.nova27.servermanager.config.Server;
-import com.github.nova27.servermanager.utils.Bridge;
-import com.github.nova27.servermanager.utils.Messages;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 

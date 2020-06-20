@@ -4,6 +4,7 @@ import com.github.nova_27.mcplugin.servermanager.common.socket.ConnectionThread;
 import com.github.nova_27.mcplugin.servermanager.common.socket.protocol.PacketEventListener;
 import com.github.nova_27.mcplugin.servermanager.core.Smfb_core;
 import com.github.nova_27.mcplugin.servermanager.core.config.Server;
+import com.github.nova_27.mcplugin.servermanager.core.events.ServerEvent;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Messages;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Tools;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -47,6 +48,7 @@ public class ClientConnection extends ConnectionThread {
 
             Smfb_core.getInstance().log(Tools.Formatter(Messages.ServerStopped_log.toString(), srcServer.Name));
             Smfb_core.getInstance().getProxy().broadcast(new TextComponent(Tools.Formatter(Messages.ServerStopped_minecraft.toString(), srcServer.Name)));
+            Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new ServerEvent(srcServer, ServerEvent.EventType.ServerStopped));
         }, 0L, TimeUnit.SECONDS);
     }
 }

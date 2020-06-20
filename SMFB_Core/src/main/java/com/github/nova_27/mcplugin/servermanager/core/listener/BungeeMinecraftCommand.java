@@ -1,8 +1,10 @@
 package com.github.nova_27.mcplugin.servermanager.core.listener;
 
+import com.github.nova_27.mcplugin.servermanager.core.Smfb_core;
 import com.github.nova_27.mcplugin.servermanager.core.command.MinecraftCommandExecutor;
 import com.github.nova_27.mcplugin.servermanager.core.config.ConfigData;
 import com.github.nova_27.mcplugin.servermanager.core.config.Server;
+import com.github.nova_27.mcplugin.servermanager.core.events.ServerEvent;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Messages;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Tools;
 import net.md_5.bungee.api.CommandSender;
@@ -140,6 +142,7 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
             } else {
                 //起動済みだったら
                 sender.sendMessage(new TextComponent(Tools.Formatter(Messages.ServerStopping_log.toString(), ID)));
+                Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new ServerEvent(server, ServerEvent.EventType.ServerStopping));
                 server.StopServer();
             }
         }
@@ -197,6 +200,7 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
         //フラグを変更する
         server.Enabled = true;
         sender.sendMessage(new TextComponent(Tools.Formatter(Messages.EnableDisableCommand_changedflag.toString(), server.Name, "true")));
+        Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new ServerEvent(server, ServerEvent.EventType.ServerEnabled));
     }
 
     /**
@@ -225,6 +229,7 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
         server.StopServer();
         server.Enabled = false;
         sender.sendMessage(new TextComponent(Tools.Formatter(Messages.EnableDisableCommand_changedflag.toString(), server.Name, "true")));
+        Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new ServerEvent(server, ServerEvent.EventType.ServerDisabled));
     }
 
     /**

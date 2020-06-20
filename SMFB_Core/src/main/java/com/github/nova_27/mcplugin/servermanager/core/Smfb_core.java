@@ -5,6 +5,8 @@ import com.github.nova_27.mcplugin.servermanager.common.socket.protocol.PacketEv
 import com.github.nova_27.mcplugin.servermanager.core.config.ConfigData;
 import com.github.nova_27.mcplugin.servermanager.core.config.ConfigGetter;
 import com.github.nova_27.mcplugin.servermanager.core.config.Server;
+import com.github.nova_27.mcplugin.servermanager.core.events.ServerEvent;
+import com.github.nova_27.mcplugin.servermanager.core.events.TimerEvent;
 import com.github.nova_27.mcplugin.servermanager.core.listener.BungeeListener;
 import com.github.nova_27.mcplugin.servermanager.core.listener.BungeeMinecraftCommand;
 import com.github.nova_27.mcplugin.servermanager.core.socket.ClientConnection;
@@ -23,6 +25,7 @@ import java.util.Arrays;
 import java.util.Locale;
 
 import static com.github.nova_27.mcplugin.servermanager.core.config.ConfigData.Lobby;
+import static com.github.nova_27.mcplugin.servermanager.core.events.TimerEvent.EventType.TimerStopped;
 
 public final class Smfb_core extends Plugin implements PacketEventListener {
 
@@ -153,6 +156,7 @@ public final class Smfb_core extends Plugin implements PacketEventListener {
 
         log(Tools.Formatter(Messages.ServerStarted_log.toString(), srcServer.Name));
         ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.ServerStarted_minecraft.toString(), srcServer.Name)));
+        Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new ServerEvent(srcServer, ServerEvent.EventType.ServerStarted));
     }
 
     @Override
@@ -170,11 +174,13 @@ public final class Smfb_core extends Plugin implements PacketEventListener {
             if(srcServer.StartTimer()) {
                 log(Tools.Formatter(Messages.TimerStarted_log.toString(), "" + ConfigData.CloseTime, srcServer.Name));
                 ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.TimerStarted_Minecraft.toString(), "" + ConfigData.CloseTime, srcServer.Name)));
+                Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new TimerEvent(srcServer, TimerEvent.EventType.TimerStarted));
             }
         }else{
             if(srcServer.StopTimer()) {
                 Smfb_core.getInstance().log(Tools.Formatter(Messages.TimerStopped_log.toString(), srcServer.Name));
                 ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.TimerStopped_Minecraft.toString(), srcServer.Name)));
+                Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new TimerEvent(srcServer, TimerStopped));
             }
         }
     }

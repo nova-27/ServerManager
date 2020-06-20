@@ -3,6 +3,7 @@ package com.github.nova_27.mcplugin.servermanager.core.listener;
 import com.github.nova_27.mcplugin.servermanager.core.Smfb_core;
 import com.github.nova_27.mcplugin.servermanager.core.config.ConfigData;
 import com.github.nova_27.mcplugin.servermanager.core.config.Server;
+import com.github.nova_27.mcplugin.servermanager.core.events.TimerEvent;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Messages;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Tools;
 import net.md_5.bungee.api.ProxyServer;
@@ -15,6 +16,7 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
 import static com.github.nova_27.mcplugin.servermanager.core.config.ConfigData.Lobby;
+import static com.github.nova_27.mcplugin.servermanager.core.events.TimerEvent.EventType.TimerStopped;
 
 /**
  * BungeeCordイベントリスナー
@@ -41,6 +43,7 @@ public class BungeeListener implements Listener {
                 //起動済みだったらタイマーストップ
                 Lobby.StopTimer();
                 Smfb_core.getInstance().log(Tools.Formatter(Messages.TimerStopped_log.toString(), Lobby.Name));
+                Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new TimerEvent(Lobby, TimerStopped));
             }
         }
     }
@@ -55,6 +58,7 @@ public class BungeeListener implements Listener {
             //0人になったら
             Lobby.StartTimer();
             Smfb_core.getInstance().log(Tools.Formatter(Messages.TimerStarted_log.toString(), ""+ ConfigData.CloseTime, Lobby.Name));
+            Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new TimerEvent(Lobby, TimerEvent.EventType.TimerStarted));
         }
     }
 

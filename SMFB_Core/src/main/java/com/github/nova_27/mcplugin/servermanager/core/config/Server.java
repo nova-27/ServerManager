@@ -2,20 +2,25 @@ package com.github.nova_27.mcplugin.servermanager.core.config;
 
 import com.github.nova_27.mcplugin.servermanager.common.socket.protocol.PacketID;
 import com.github.nova_27.mcplugin.servermanager.core.Smfb_core;
+import com.github.nova_27.mcplugin.servermanager.core.events.ServerEvent;
+import com.github.nova_27.mcplugin.servermanager.core.events.TimerEvent;
 import com.github.nova_27.mcplugin.servermanager.core.socket.ClientConnection;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Messages;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Tools;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-public class Server {
+import static com.github.nova_27.mcplugin.servermanager.core.events.TimerEvent.EventType.TimerRestarted;
+
+public class Server extends TimerTask {
     //Minecraftサーバー設定
     public String ID;
     public String Name;
@@ -26,10 +31,15 @@ public class Server {
 
     //サーバープロセス
     public Process Process = null;
-    private InputStream ProcessInputStream; //読みださないとブロックされる
     public boolean Started = false;
     public boolean Switching = false;
     public boolean Enabled = true;
+
+    //ログ
+    private static final int BUF_CNT = 30;
+    private int Start_write = 0;
+    private int Start_read = -1;   //-1はログを破棄する
+    private String[] logs = new String[BUF_CNT];
 
     //タイマー
     private TimerTask task = null;
@@ -74,23 +84,38 @@ public class Server {
                 }
 
                 //バッファを読みだしてブロックを防ぐ
-                ProcessInputStream = Process.getInputStream();
                 Smfb_core.getInstance().getProxy().getScheduler().schedule(Smfb_core.getInstance(), ()->{
                     try {
-                        while(ProcessInputStream.read() >= 0);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } finally {
-                        try {
-                            ProcessInputStream.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        BufferedReader br = new BufferedReader(new InputStreamReader(Process.getInputStream()));
+
+                        while (true) {
+                            if (br.ready()) {
+                                //ログを取得
+                                String line = br.readLine();
+
+                                if (line == null)
+                                    break;
+                                if (Objects.equals(line, "")) {
+                                    continue;
+                                }
+
+                                if (Start_write >= BUF_CNT) {
+                                    Start_write = 0;
+                                }
+
+                                //配列に書き込む
+                                logs[Start_write] = line;
+                                Start_write++;
+                            }
+
+                            Thread.sleep(100);
                         }
-                    }
+                    } catch (IOException | InterruptedException ignored) { }
                 }, 0L, TimeUnit.SECONDS);
 
                 Smfb_core.getInstance().log(Tools.Formatter(Messages.ServerStarting_log.toString(), Name));
                 ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.ServerStarting_minecraft.toString(), Name)));
+                Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new ServerEvent(this, ServerEvent.EventType.ServerStarting));
             } catch (IOException e) {
                 Smfb_core.getInstance().log(Messages.IOError.toString());
             }
@@ -109,26 +134,7 @@ public class Server {
      */
     public boolean StartTimer() {
         if (task == null) {
-            task = new TimerTask() {
-                @Override
-                public void run() {
-                    if(!Switching) {
-                        //処理中でなかったら
-                        Smfb_core.getInstance().log(Tools.Formatter(Messages.ServerStopping_log.toString(), Name));
-                        ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.ServerStopping_Minecraft.toString(), Name)));
-
-                        StopServer();
-                    }else{
-                        //処理中だったら見送り
-                        Smfb_core.getInstance().log(Tools.Formatter(Messages.TimerRestarted_log.toString(), Name));
-                        ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.TimerRestarted_Minecraft.toString(), Name)));
-
-                        TimerTask task = this;
-                        timer = new Timer();
-                        timer.schedule(task, ConfigData.CloseTime * 60000);
-                    }
-                }
-            };
+            task = this;
             timer = new Timer();
             timer.schedule(task, ConfigData.CloseTime * 60000);
 
@@ -155,6 +161,7 @@ public class Server {
     public void AliveCheck() {
         if((Started || Switching) && !Process.isAlive()) {
             ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.ProcessDied.toString(), Name)));
+            Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new ServerEvent(this, ServerEvent.EventType.ServerErrorHappened));
             Switching = false;
             Started = false;
             Process.destroy();
@@ -195,6 +202,55 @@ public class Server {
             }else{
                 return Messages.ServerStatus_stopping.toString();
             }
+        }
+    }
+
+    /**
+     * ログを読む
+     * @return ログ
+     */
+    public String getLog() {
+        //ログを破棄していたら、いったん変数をリセット
+        if(Start_read == -1) {
+            Start_write = 0;
+            Start_read = 0;
+            logs = new String[BUF_CNT];
+        }
+
+        if (Start_read >= BUF_CNT) {
+            Start_read = 0;
+        }
+
+        String log;
+        if((log = logs[Start_read]) != null){
+            Start_read++;
+            return log;
+        }
+
+        return null;
+    }
+
+    /**
+     * タイマータスク
+     */
+    @Override
+    public void run() {
+        if(!Switching) {
+            //処理中でなかったら
+            Smfb_core.getInstance().log(Tools.Formatter(Messages.ServerStopping_log.toString(), Name));
+            ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.ServerStopping_Minecraft.toString(), Name)));
+            Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new ServerEvent(this, ServerEvent.EventType.ServerStopping));
+
+            StopServer();
+        }else{
+            //処理中だったら見送り
+            Smfb_core.getInstance().log(Tools.Formatter(Messages.TimerRestarted_log.toString(), Name));
+            ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.TimerRestarted_Minecraft.toString(), Name)));
+            Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new TimerEvent(this, TimerRestarted));
+
+            TimerTask task = this;
+            timer = new Timer();
+            timer.schedule(task, ConfigData.CloseTime * 60000);
         }
     }
 }
