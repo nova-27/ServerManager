@@ -21,6 +21,7 @@ import net.minecrell.serverlistplus.core.ServerListPlusCore;
 import net.minecrell.serverlistplus.core.replacement.LiteralPlaceholder;
 import net.minecrell.serverlistplus.core.replacement.ReplacementManager;
 import net.minecrell.serverlistplus.core.status.StatusResponse;
+import org.bstats.bungeecord.Metrics;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +56,9 @@ public final class Smfb_core extends Plugin implements PacketEventListener {
     @Override
     public void onEnable() {
         instance = this;
+
+        // 統計
+        new Metrics(this, 7908);
 
         //イベント登録
         getProxy().getPluginManager().registerListener(this, new BungeeListener());
