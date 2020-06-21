@@ -10,7 +10,7 @@ This tool saves power and server resources when there are no players on the serv
 <h3>Save PC resources</h3>
 ・After the specified time elapses, the servers under BungeeCord management are automatically closed.<br>
 ・If you try to log in to the server while the plugin is closing the server, the server will start automatically.<br>
-・You can leave the specified server down.
+・You can leave the specified server stopped.
 <h3>TODO</h3>
 ・Send messages that sent to Minecraft or Discord to each other.<br>
 ・You can check the status of the server by using the command from discord.
