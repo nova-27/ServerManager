@@ -8,8 +8,8 @@ import com.github.nova_27.mcplugin.servermanager.core.utils.Messages;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Tools;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
+import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -27,7 +27,7 @@ public class BungeeListener implements Listener {
      * @param e ログイン情報
      */
     @EventHandler
-    public void onLogin(LoginEvent e) {
+    public void postLoginEvent(PreLoginEvent e) {
         //一人目の場合
         if(ProxyServer.getInstance().getPlayers().size() == 0) {
             //サーバーを起動

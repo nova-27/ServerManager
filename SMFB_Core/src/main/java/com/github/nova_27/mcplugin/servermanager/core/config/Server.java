@@ -242,7 +242,11 @@ public class Server {
         for(int i = 0; i <= num; i++) {
             if(logs[reading] == null) break;
             readLogs += logs[reading] + "\n";
+
             reading--;
+            if (reading < 0) {
+                reading = BUF_CNT - 1;
+            }
         }
 
         return readLogs;
