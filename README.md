@@ -3,7 +3,7 @@
 <a href="https://github.com/nova-27/ServerManager/blob/master/LICENSE"><img alt="license" src="https://img.shields.io/github/license/nova-27/ServerManager?color=b8b8b8"></a>
 
 <h1>ServerManager</h1>
-~~By using this tool, you can manage Minecraft BungeeCord and the servers under its control from Discord.~~
+~~By using this tool, you can manage Minecraft BungeeCord and the servers under its control from Discord.~~  
 This tool saves power and server resources when there are no players on the server.
 (For small and medium-sized servers)
 
