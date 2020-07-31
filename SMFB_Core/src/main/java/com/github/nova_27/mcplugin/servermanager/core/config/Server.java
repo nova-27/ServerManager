@@ -109,9 +109,9 @@ public class Server {
                                 //配列に書き込む
                                 logs[Start_write] = line;
                                 Start_write++;
+                            }else {
+                                Thread.sleep(100);
                             }
-
-                            Thread.sleep(100);
                         }
                     } catch (IOException | InterruptedException ignored) { }
                 }, 0L, TimeUnit.SECONDS);
