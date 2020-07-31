@@ -9,7 +9,7 @@ import com.github.nova_27.mcplugin.servermanager.core.utils.Tools;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.PreLoginEvent;
+import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -27,18 +27,18 @@ public class BungeeListener implements Listener {
      * @param e ログイン情報
      */
     @EventHandler
-    public void postLoginEvent(PreLoginEvent e) {
+    public void postLoginEvent(PostLoginEvent e) {
         //一人目の場合
         if(ProxyServer.getInstance().getPlayers().size() == 0) {
             //サーバーを起動
             if (!Lobby.Started) {
                 //起動していなかったら、キック
-                e.getConnection().disconnect(new TextComponent(Messages.LobbyNotStarted.toString()));
+                e.getPlayer().disconnect(new TextComponent(Messages.LobbyNotStarted.toString()));
                 Lobby.StartServer();
             }
             else if (Lobby.Switching){
                 //処理中だったら、キック
-                e.getConnection().disconnect(new TextComponent(Messages.LobbySwitching.toString()));
+                e.getPlayer().disconnect(new TextComponent(Messages.LobbySwitching.toString()));
             }else{
                 //起動済みだったらタイマーストップ
                 Lobby.StopTimer();
