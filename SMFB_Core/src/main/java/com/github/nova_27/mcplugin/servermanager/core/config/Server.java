@@ -109,6 +109,8 @@ public class Server {
                                 //配列に書き込む
                                 logs[Start_write] = line;
                                 Start_write++;
+
+                                Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new ServerEvent(this, ServerEvent.EventType.ServerLogged));
                             }else {
                                 Thread.sleep(100);
                             }

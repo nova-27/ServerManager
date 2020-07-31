@@ -31,5 +31,7 @@ public class ServerEvent extends Event {
         ServerStopping,
         ServerStopped,
         ServerErrorHappened,
+
+        ServerLogged
     }
 }
