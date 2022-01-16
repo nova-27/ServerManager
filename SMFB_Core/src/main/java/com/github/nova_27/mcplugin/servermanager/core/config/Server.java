@@ -28,6 +28,7 @@ public class Server {
     private String Dir;
     private String File;
     private String Args;
+    private String JavaCmd;
 
     //サーバープロセス
     public Process Process = null;
@@ -62,6 +63,16 @@ public class Server {
         this.Args = Args;
     }
 
+    public Server(String ID, String Name, int Port, String Dir, String File, String Args, String JavaCmd) {
+        this.ID = ID;
+        this.Name = Name;
+        this.Port = Port;
+        this.Dir = Dir;
+        this.File = File;
+        this.Args = Args;
+        this.JavaCmd = JavaCmd;
+    }
+
     private Server getServer() {
         return this;
     }
@@ -76,14 +87,16 @@ public class Server {
                 Started = true;
                 Switching = true;
 
+                String JavaCmd = (this.JavaCmd != null && !this.JavaCmd.isEmpty()) ? this.JavaCmd : "java";
+
                 String OS_NAME = System.getProperty("os.name").toLowerCase();
                 if(OS_NAME.startsWith("linux")) {
                     //Linuxの場合
-                    Process = new ProcessBuilder("/bin/bash","-c","cd  " + Dir + " ; java -jar " + Args + " " + File).start();
+                    Process = new ProcessBuilder("/bin/bash","-c","cd  " + Dir + " ; " + JavaCmd + " -jar " + Args + " " + File).start();
                 }else if(OS_NAME.startsWith("windows")) {
                     //Windowsの場合
                     Runtime r = Runtime.getRuntime();
-                    Process = r.exec("cmd /c cd " + Dir + " && java -jar " + Args + " " + File);
+                    Process = r.exec("cmd /c cd " + Dir + " && " + JavaCmd + " -jar " + Args + " " + File);
                 }
 
                 //バッファを読みだしてブロックを防ぐ

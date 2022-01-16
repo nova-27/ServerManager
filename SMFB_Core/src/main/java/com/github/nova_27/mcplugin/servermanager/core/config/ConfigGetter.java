@@ -44,6 +44,7 @@ public class ConfigGetter {
             String Dir = plugin_configuration.getString("Server." + Id + ".Dir");
             String File = plugin_configuration.getString("Server." + Id + ".File");
             String Args = plugin_configuration.getString("Server." + Id +  ".Args");
+            String JavaCmd = plugin_configuration.getString("Server." + Id + ".JavaCmd");
 
             int Port = 0;
             Map<String, ServerInfo> servers_map = Smfb_core.getInstance().getProxy().getConfig().getServers();
@@ -54,7 +55,7 @@ public class ConfigGetter {
                 }
             }
 
-            ConfigData.Servers[i] = new Server(Id, Name, Port, Dir, File, Args);
+            ConfigData.Servers[i] = new Server(Id, Name, Port, Dir, File, Args, JavaCmd);
         }
 
         //ロビーサーバーを取得
