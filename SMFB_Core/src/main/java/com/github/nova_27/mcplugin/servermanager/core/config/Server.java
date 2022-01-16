@@ -3,9 +3,11 @@ package com.github.nova_27.mcplugin.servermanager.core.config;
 import com.github.nova_27.mcplugin.servermanager.common.socket.protocol.PacketID;
 import com.github.nova_27.mcplugin.servermanager.core.Smfb_core;
 import com.github.nova_27.mcplugin.servermanager.core.events.ServerEvent;
+import com.github.nova_27.mcplugin.servermanager.core.events.ServerPreStartEvent;
 import com.github.nova_27.mcplugin.servermanager.core.events.TimerEvent;
 import com.github.nova_27.mcplugin.servermanager.core.socket.ClientConnection;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Messages;
+import com.github.nova_27.mcplugin.servermanager.core.utils.Requester;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Tools;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -63,6 +65,16 @@ public class Server {
         this.Args = Args;
     }
 
+    /**
+     * コンストラクタ
+     * @param ID サーバーID（BungeeCordと同一）
+     * @param Name サーバー名（表示用）
+     * @param Port サーバーポート番号
+     * @param Dir サーバーのルートディレクトリ
+     * @param File サーバー本体（jar）
+     * @param Args 実行引数
+     * @param JavaCmd Javaコマンド
+     */
     public Server(String ID, String Name, int Port, String Dir, String File, String Args, String JavaCmd) {
         this.ID = ID;
         this.Name = Name;
@@ -83,6 +95,9 @@ public class Server {
     public void StartServer() {
         //有効かつ未処理で開始されていないときは開始
         if(!Started && !Switching && Enabled) {
+            if (ProxyServer.getInstance().getPluginManager().callEvent(new ServerPreStartEvent(this, null)).isCancelled())
+                return;  // cancelled
+
             try {
                 Started = true;
                 Switching = true;
@@ -138,6 +153,78 @@ public class Server {
                 Smfb_core.getInstance().log(Messages.IOError.toString());
             }
         }
+    }
+
+    /**
+     * サーバーをスタートする
+     * @param requester 起動リクエストの要求オブジェクト
+     * @return サーバーの起動を開始したら真を返す
+     */
+    public boolean StartServer(Requester requester) {
+        //有効かつ未処理で開始されていないときは開始
+        if(!Started && !Switching && Enabled) {
+            if (ProxyServer.getInstance().getPluginManager().callEvent(new ServerPreStartEvent(this, requester)).isCancelled())
+                return false;  // cancelled
+
+            try {
+                Started = true;
+                Switching = true;
+
+                String JavaCmd = (this.JavaCmd != null && !this.JavaCmd.isEmpty()) ? this.JavaCmd : "java";
+
+                String OS_NAME = System.getProperty("os.name").toLowerCase();
+                if(OS_NAME.startsWith("linux")) {
+                    //Linuxの場合
+                    Process = new ProcessBuilder("/bin/bash","-c","cd  " + Dir + " ; " + JavaCmd + " -jar " + Args + " " + File).start();
+                }else if(OS_NAME.startsWith("windows")) {
+                    //Windowsの場合
+                    Runtime r = Runtime.getRuntime();
+                    Process = r.exec("cmd /c cd " + Dir + " && " + JavaCmd + " -jar " + Args + " " + File);
+                }
+
+                //バッファを読みだしてブロックを防ぐ
+                Smfb_core.getInstance().getProxy().getScheduler().schedule(Smfb_core.getInstance(), ()->{
+                    try {
+                        BufferedReader br = new BufferedReader(new InputStreamReader(Process.getInputStream()));
+
+                        while (true) {
+                            if (br.ready()) {
+                                //ログを取得
+                                String line = br.readLine();
+
+                                if (line == null)
+                                    break;
+                                if (Objects.equals(line, "")) {
+                                    continue;
+                                }
+
+                                if (Start_write >= BUF_CNT) {
+                                    Start_write = 0;
+                                }
+
+                                //配列に書き込む
+                                logs[Start_write] = line;
+                                Start_write++;
+
+                                Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new ServerEvent(this, ServerEvent.EventType.ServerLogged));
+                            }else {
+                                Thread.sleep(100);
+                            }
+                        }
+                    } catch (IOException | InterruptedException ignored) { }
+                }, 0L, TimeUnit.SECONDS);
+
+                Smfb_core.getInstance().log(Tools.Formatter(Messages.ServerStarting_log.toString(), Name));
+                ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.ServerStarting_minecraft.toString(), Name)));
+                Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new ServerEvent(this, ServerEvent.EventType.ServerStarting));
+                return true;
+
+            } catch (IOException e) {
+                Smfb_core.getInstance().log(Messages.IOError.toString());
+            }
+        }
+
+        return false;
     }
 
     public void StopServer() {

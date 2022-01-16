@@ -8,6 +8,7 @@ import com.github.nova_27.mcplugin.servermanager.core.config.Server;
 import com.github.nova_27.mcplugin.servermanager.core.events.ServerEvent;
 import com.github.nova_27.mcplugin.servermanager.core.socket.ClientConnection;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Messages;
+import com.github.nova_27.mcplugin.servermanager.core.utils.Requester;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Tools;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -108,8 +109,10 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
                 //停止済みだったら
                 if (server.Enabled) {
                     //有効だったら
-                    sender.sendMessage(new TextComponent(Tools.Formatter(Messages.BungeeCommand_start.toString(), ID)));
-                    server.StartServer();
+                    if (server.StartServer(Requester.of(sender))) {
+                        //起動リクエストに成功したら
+                        sender.sendMessage(new TextComponent(Tools.Formatter(Messages.BungeeCommand_start.toString(), ID)));
+                    }
                 } else {
                     //無効だったら
                     sender.sendMessage(new TextComponent(Tools.Formatter(Messages.BungeeCommand_disabled.toString(), ID)));
