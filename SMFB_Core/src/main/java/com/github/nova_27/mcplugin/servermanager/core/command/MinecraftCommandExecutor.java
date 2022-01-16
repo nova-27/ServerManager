@@ -6,10 +6,8 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Minecraftコマンドの呼び出し等を行うクラス
@@ -104,15 +102,26 @@ public class MinecraftCommandExecutor extends Command implements TabExecutor {
             return Collections.emptyList();
         }
 
-        Set<String> match = new HashSet();
         args[0] = args[0].toLowerCase();
         if(args.length == 1) {
-            for(MinecraftSubCommandBuilder subCommand : subCommands) {
-                if(subCommand.alias.startsWith(args[0])) match.add(subCommand.alias);
+            return subCommands.stream()
+                    .map(b -> b.alias)
+                    .filter(alias -> alias.startsWith(args[0]))
+                    .collect(Collectors.toSet());
+
+        } else {
+            for (MinecraftSubCommandBuilder subCommand : subCommands) {
+                if (subCommand.alias.equalsIgnoreCase(args[0])) {
+                    ArrayList<String> argsList = new ArrayList<>(Arrays.asList(args));
+                    argsList.remove(0);
+
+                    return (subCommand.tabExecutor != null) ?
+                            subCommand.tabExecutor.onTabComplete(commandSender, argsList.toArray(new String[0])) : Collections.emptyList();
+                }
             }
         }
 
-        return match;
+        return Collections.emptyList();
     }
 
     /**
@@ -124,13 +133,23 @@ public class MinecraftCommandExecutor extends Command implements TabExecutor {
         private MinecraftCommandBase action;
         private boolean isDefault;
         private int requireArgs;
+        private TabExecutor tabExecutor;
 
         /**
          * コンストラクタ
          * @param alias エイリアス
          * @param subPermission 権限
          * @param action 実行する処理
+         * @param tabExecutor 引数の補完処理
          */
+        public MinecraftSubCommandBuilder(String alias, String subPermission, MinecraftCommandBase action, TabExecutor tabExecutor) {
+            this.alias = alias;
+            this.subPermission = permission + "." + subPermission;
+            this.action = action;
+            isDefault = false;
+            requireArgs = 0;
+            this.tabExecutor = tabExecutor;
+        }
         public MinecraftSubCommandBuilder(String alias, String subPermission, MinecraftCommandBase action) {
             this.alias = alias;
             this.subPermission = permission + "." + subPermission;
