@@ -8,13 +8,16 @@ import com.github.nova_27.mcplugin.servermanager.core.config.Server;
 import com.github.nova_27.mcplugin.servermanager.core.events.ServerEvent;
 import com.github.nova_27.mcplugin.servermanager.core.socket.ClientConnection;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Messages;
+import com.github.nova_27.mcplugin.servermanager.core.utils.Requester;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Tools;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * BungeeCordコマンド
@@ -38,12 +41,12 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
         super(NAME, PERM, ALIASES);
         addSubCommand(new MinecraftSubCommandBuilder("help", this::helpCmd).setDefault(true));
         addSubCommand(new MinecraftSubCommandBuilder("list", this::listCmd));
-        addSubCommand(new MinecraftSubCommandBuilder("start", START_PERM, this::startCmd).requireArgs(1));
-        addSubCommand(new MinecraftSubCommandBuilder("stop", STOP_PERM, this::stopCmd).requireArgs(1));
-        addSubCommand(new MinecraftSubCommandBuilder("status", STATUS_PERM, this::statusCmd).requireArgs(1));
-        addSubCommand(new MinecraftSubCommandBuilder("enable", ENABLE_PERM, this::enableCmd).requireArgs(1));
-        addSubCommand(new MinecraftSubCommandBuilder("disable", DISABLE_PERM, this::disableCmd).requireArgs(1));
-        addSubCommand(new MinecraftSubCommandBuilder("send-cmd", SEND_CMD_PERM, this::sendcmd_Cmd).requireArgs(2));
+        addSubCommand(new MinecraftSubCommandBuilder("start", START_PERM, this::startCmd, this::completeServers).requireArgs(1));
+        addSubCommand(new MinecraftSubCommandBuilder("stop", STOP_PERM, this::stopCmd, this::completeServers).requireArgs(1));
+        addSubCommand(new MinecraftSubCommandBuilder("status", STATUS_PERM, this::statusCmd, this::completeServers).requireArgs(1));
+        addSubCommand(new MinecraftSubCommandBuilder("enable", ENABLE_PERM, this::enableCmd, this::completeServers).requireArgs(1));
+        addSubCommand(new MinecraftSubCommandBuilder("disable", DISABLE_PERM, this::disableCmd, this::completeServers).requireArgs(1));
+        addSubCommand(new MinecraftSubCommandBuilder("send-cmd", SEND_CMD_PERM, this::sendcmd_Cmd, this::completeServers).requireArgs(2));
     }
 
     /**
@@ -108,8 +111,10 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
                 //停止済みだったら
                 if (server.Enabled) {
                     //有効だったら
-                    sender.sendMessage(new TextComponent(Tools.Formatter(Messages.BungeeCommand_start.toString(), ID)));
-                    server.StartServer();
+                    if (server.StartServer(Requester.of(sender))) {
+                        //起動リクエストに成功したら
+                        sender.sendMessage(new TextComponent(Tools.Formatter(Messages.BungeeCommand_start.toString(), ID)));
+                    }
                 } else {
                     //無効だったら
                     sender.sendMessage(new TextComponent(Tools.Formatter(Messages.BungeeCommand_disabled.toString(), ID)));
@@ -339,4 +344,17 @@ public class BungeeMinecraftCommand extends MinecraftCommandExecutor {
             ProxyServer.getInstance().broadcast(new TextComponent(Bridge.Formatter(Messages.BungeeCommand_new_request.toString(), requestServer.Name, requestServer.requests.size() + "", expiration_String)));
         }
     }*/
+
+
+    private Iterable<String> completeServers(CommandSender sender, String[] args) {
+        if (args.length == 1) {
+            String argument = args[0].toLowerCase(Locale.ROOT);
+            return Stream.of(ConfigData.Servers)
+                    .map(s -> s.ID)
+                    .filter(id -> id.toLowerCase(Locale.ROOT).startsWith(argument))
+                    .collect(Collectors.toSet());
+        }
+        return Collections.emptySet();
+    }
+
 }
