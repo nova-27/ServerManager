@@ -29,7 +29,7 @@ public class BungeeListener implements Listener {
     @EventHandler
     public void postLoginEvent(PostLoginEvent e) {
         //一人目の場合
-        if(ProxyServer.getInstance().getPlayers().size() == 0) {
+        if(ProxyServer.getInstance().getPlayers().size() == 1) {
             //サーバーを起動
             if (!Lobby.Started) {
                 //起動していなかったら、キック
