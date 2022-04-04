@@ -74,7 +74,7 @@ public final class Smfb_bukkitbridge extends JavaPlugin implements PacketEventLi
         if(connectionThread != null) {
             connectionThread.stopSocket();
             try {
-                connectionThread.join();
+                connectionThread.join(5000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
