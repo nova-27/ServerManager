@@ -15,6 +15,7 @@ import com.github.nova_27.mcplugin.servermanager.core.utils.Messages;
 import com.github.nova_27.mcplugin.servermanager.core.utils.Tools;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.minecrell.serverlistplus.bungee.BungeePlugin;
 import net.minecrell.serverlistplus.core.ServerListPlusCore;
@@ -194,6 +195,12 @@ public final class Smfb_core extends Plugin implements PacketEventListener {
 
         log(Tools.Formatter(Messages.ServerStarted_log.toString(), srcServer.Name));
         ProxyServer.getInstance().broadcast(new TextComponent(Tools.Formatter(Messages.ServerStarted_minecraft.toString(), srcServer.Name)));
+
+        // 起動完了かつプレイヤーが未参加であれば停止タイマーを開始する
+        ServerInfo bungeeServerInfo = getProxy().getServerInfo(srcServer.ID);
+        if (bungeeServerInfo != null && bungeeServerInfo.getPlayers().isEmpty())
+            srcServer.StartTimer();
+
         Smfb_core.getInstance().getProxy().getPluginManager().callEvent(new ServerEvent(srcServer, ServerEvent.EventType.ServerStarted));
     }
 
