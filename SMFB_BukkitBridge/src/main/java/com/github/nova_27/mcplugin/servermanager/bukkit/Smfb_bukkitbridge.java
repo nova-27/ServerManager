@@ -59,9 +59,11 @@ public final class Smfb_bukkitbridge extends JavaPlugin implements PacketEventLi
             return;
         }
 
-        //スレッドを開始する
+        //接続スレッドを初期化する
         connectionThread = new ConnectionThread(socket, this);
-        connectionThread.start();
+
+        // 起動が完了したらスレッドを開始する (起動完了と見なす)
+        getServer().getScheduler().runTask(this, () -> connectionThread.start());
 
         //リスナーの登録
         getServer().getPluginManager().registerEvents(new SpigotListener(), this);
@@ -74,7 +76,7 @@ public final class Smfb_bukkitbridge extends JavaPlugin implements PacketEventLi
         if(connectionThread != null) {
             connectionThread.stopSocket();
             try {
-                connectionThread.join();
+                connectionThread.join(5000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
